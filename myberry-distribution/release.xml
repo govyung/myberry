@@ -12,6 +12,7 @@
             <directory>../</directory>
             <includes>
                 <include>README.md</include>
+                <include>LICENSE</include>
             </includes>
         </fileSet>
 

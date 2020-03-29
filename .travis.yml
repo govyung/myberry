@@ -7,7 +7,8 @@ jdk:
 install: true
 
 script:
-  - mvn org.jacoco:jacoco-maven-plugin:prepare-agent -Prelease-all clean install -U
+  - mvn jacoco:prepare-agent -Prelease-all clean install -U
+  - mvn jacoco:report
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
