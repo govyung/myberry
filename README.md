@@ -1,6 +1,7 @@
 # MyBerry Project
 
 [![Build Status](https://travis-ci.com/govyung/myberry.svg?branch=master)](https://travis-ci.com/govyung/myberry)
+[![codecov](https://codecov.io/gh/govyung/myberry/branch/master/graph/badge.svg)](https://codecov.io/gh/govyung/myberry)
 ![license](https://img.shields.io/github/license/govyung/myberry)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/govyung/myberry.svg)](http://isitmaintained.com/project/govyung/myberry "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/govyung/myberry.svg)](http://isitmaintained.com/project/govyung/myberry "Percentage of issues still open")
