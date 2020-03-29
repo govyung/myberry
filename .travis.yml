@@ -7,8 +7,7 @@ jdk:
 install: true
 
 script:
-  - mvn cobertura:cobertura
-  - mvn -Prelease-all -DskipTests clean install -U
+  - mvn -Prelease-all clean install -U
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
