@@ -1,0 +1,16 @@
+language: java
+sudo: false
+
+jdk:
+  - openjdk8
+
+install: true
+
+script:
+  - mvn -Prelease-all -DskipTests clean install -U
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+  - echo "build failed!"
