@@ -25,6 +25,5 @@ package org.myberry.store.common;
 
 public class LoggerName {
 
-	public static final String STORE_LOGGER_NAME = "MyberryStore";
-
+  public static final String STORE_LOGGER_NAME = "MyberryStore";
 }

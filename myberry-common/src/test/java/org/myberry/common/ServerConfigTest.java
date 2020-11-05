@@ -30,9 +30,9 @@ import org.myberry.common.ServerConfig;
 
 public class ServerConfigTest {
 
-	@Test
-	public void testClientManageThreadPoolNums() {
-		int expect = 2 << 4;
-		assertEquals(expect, new ServerConfig().getClientManageThreadPoolNums());
-	}
+  @Test
+  public void testClientManageThreadPoolNums() {
+    int expect = 2 << 4;
+    assertEquals(expect, new ServerConfig().getClientManageThreadPoolNums());
+  }
 }

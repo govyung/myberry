@@ -39,7 +39,7 @@ public class StoreHeader {
   private static int maxSidHeader = 48;
   private static int mySidHeader = 52;
   private static int componentCountHeader = 56;
-  private static int runningModeHeader = 60;
+  private static int produceModeHeader = 60;
 
   private final ByteBuffer byteBuffer;
 
@@ -53,7 +53,7 @@ public class StoreHeader {
   private AtomicInteger maxSid = new AtomicInteger();
   private AtomicInteger mySid = new AtomicInteger();
   private AtomicInteger componentCount = new AtomicInteger();
-  private AtomicInteger runningMode = new AtomicInteger();
+  private AtomicInteger produceMode = new AtomicInteger();
 
   public StoreHeader(final ByteBuffer byteBuffer) {
     this.byteBuffer = byteBuffer;
@@ -69,7 +69,7 @@ public class StoreHeader {
     this.setMaxSid(byteBuffer.getInt(maxSidHeader));
     this.setMySid(byteBuffer.getInt(mySidHeader));
     this.setComponentCount(byteBuffer.getInt(componentCountHeader));
-    this.setRunningMode(byteBuffer.getInt(runningModeHeader));
+    this.setProduceMode(byteBuffer.getInt(produceModeHeader));
   }
 
   public long getBeginTimestamp() {
@@ -153,13 +153,13 @@ public class StoreHeader {
     this.byteBuffer.putInt(componentCountHeader, componentCount);
   }
 
-  public int getRunningMode() {
-    return runningMode.get();
+  public int getProduceMode() {
+    return produceMode.get();
   }
 
-  public void setRunningMode(int runningMode) {
-    this.runningMode.set(runningMode);
-    this.byteBuffer.putInt(runningModeHeader, runningMode);
+  public void setProduceMode(int produceMode) {
+    this.produceMode.set(produceMode);
+    this.byteBuffer.putInt(produceModeHeader, produceMode);
   }
 
   public ByteBuffer getByteBuffer() {

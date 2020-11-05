@@ -41,7 +41,7 @@ public class ByteBufTest {
     ByteBuf byteBuf1 = new ByteBuf();
     byteBuf1.setVersion(30);
     byteBuf1.setClusterName("测试");
-    byteBuf1.setRunningMode(55);
+    byteBuf1.setProduceMode(55);
     byteBuf1.setFileSize(1000);
     byteBuf1.setConnId(101);
     byteBuf1.setData(vote);
@@ -51,7 +51,7 @@ public class ByteBufTest {
     ByteBuf decode1 = ByteBuf.decode(byteBuffer1, pos1);
     Assert.assertEquals(30, decode1.getVersion());
     Assert.assertEquals("测试", decode1.getClusterName());
-    Assert.assertEquals(55, decode1.getRunningMode());
+    Assert.assertEquals(55, decode1.getProduceMode());
     Assert.assertEquals(1000, decode1.getFileSize());
     Assert.assertEquals(101, decode1.getConnId());
     Assert.assertNotNull(decode1.getData());
@@ -67,7 +67,7 @@ public class ByteBufTest {
     ByteBuf byteBuf2 = new ByteBuf();
     byteBuf2.setVersion(30);
     byteBuf2.setClusterName("测试");
-    byteBuf2.setRunningMode(55);
+    byteBuf2.setProduceMode(55);
     byteBuf2.setFileSize(1000);
     byteBuf2.setConnId(101);
     byteBuf2.setData(proposal);
@@ -77,7 +77,7 @@ public class ByteBufTest {
     ByteBuf decode2 = ByteBuf.decode(byteBuffer2, pos2);
     Assert.assertEquals(30, decode2.getVersion());
     Assert.assertEquals("测试", decode2.getClusterName());
-    Assert.assertEquals(55, decode2.getRunningMode());
+    Assert.assertEquals(55, decode2.getProduceMode());
     Assert.assertEquals(1000, decode2.getFileSize());
     Assert.assertEquals(101, decode2.getConnId());
     Assert.assertNotNull(decode2.getData());

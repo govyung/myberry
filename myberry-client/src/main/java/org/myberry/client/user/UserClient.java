@@ -23,7 +23,7 @@
 */
 package org.myberry.client.user;
 
-import java.util.Map;
+import java.util.HashMap;
 import org.myberry.client.exception.MyberryClientException;
 import org.myberry.client.exception.MyberryServerException;
 import org.myberry.remoting.exception.RemotingException;
@@ -34,7 +34,7 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
-  PullResult pull(String key, Map<String, String> attachments)
+  PullResult pull(String key, HashMap<String, String> attachments)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
@@ -42,7 +42,7 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
-  PullResult pull(String key, Map<String, String> attachments, long timeout)
+  PullResult pull(String key, HashMap<String, String> attachments, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
@@ -50,7 +50,7 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
-  PullResult pull(String key, Map<String, String> attachments, long timeout, int timesRetry)
+  PullResult pull(String key, HashMap<String, String> attachments, long timeout, int timesRetry)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
@@ -58,7 +58,7 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
-  void pull(String key, Map<String, String> attachments, PullCallback pullCallback)
+  void pull(String key, HashMap<String, String> attachments, PullCallback pullCallback)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
@@ -66,7 +66,8 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
-  void pull(String key, Map<String, String> attachments, PullCallback pullCallback, long timeout)
+  void pull(
+      String key, HashMap<String, String> attachments, PullCallback pullCallback, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
@@ -76,7 +77,7 @@ public interface UserClient {
 
   void pull(
       String key,
-      Map<String, String> attachments,
+      HashMap<String, String> attachments,
       PullCallback pullCallback,
       long timeout,
       int timesRetry)

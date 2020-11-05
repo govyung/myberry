@@ -25,17 +25,17 @@ package org.myberry.server.common;
 
 public class LoggerName {
 
-	public static final String QUORUM_LOGGER_NAME = "QuorumPeer";
+  public static final String QUORUM_LOGGER_NAME = "QuorumPeer";
 
-	public static final String FAST_ELECTION_NAME = "FastElection";
+  public static final String FAST_ELECTION_NAME = "FastElection";
 
-	public static final String QUORUM_CNX_MANAGER_NAME = "QuorumCnxManager";
+  public static final String QUORUM_CNX_MANAGER_NAME = "QuorumCnxManager";
 
-	public static final String QUORUM_CONNECTION_NAME = "QuorumConnection";
+  public static final String QUORUM_CONNECTION_NAME = "QuorumConnection";
 
-	public static final String MESSAGE_HANDLER_NAME = "MessageHandler";
-	
-	public static final String LEADER_NAME = "Leader";
-	
-	public static final String LEARNER_NAME = "Learner";
+  public static final String MESSAGE_HANDLER_NAME = "MessageHandler";
+
+  public static final String LEADER_NAME = "Leader";
+
+  public static final String LEARNER_NAME = "Learner";
 }

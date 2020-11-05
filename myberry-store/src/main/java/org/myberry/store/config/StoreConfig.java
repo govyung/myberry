@@ -33,7 +33,7 @@ public class StoreConfig {
 
   @ImportantField private int mySid;
 
-  @ImportantField private String runningMode;
+  @ImportantField private String produceMode;
 
   private boolean alwaysFlush;
   private long osPageCacheBusyTimeOutMills = 1000;
@@ -42,12 +42,12 @@ public class StoreConfig {
 
   @ImportantField private String storePath = System.getProperty("user.home");
 
-  public String getRunningMode() {
-    return runningMode;
+  public String getProduceMode() {
+    return produceMode;
   }
 
-  public void setRunningMode(String runningMode) {
-    this.runningMode = runningMode;
+  public void setProduceMode(String produceMode) {
+    this.produceMode = produceMode;
   }
 
   public int getMySid() {

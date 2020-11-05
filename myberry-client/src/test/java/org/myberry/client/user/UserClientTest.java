@@ -26,7 +26,6 @@ package org.myberry.client.user;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
-import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -46,7 +45,7 @@ public class UserClientTest {
 
   @Test
   public void getSync() throws Exception {
-    Map<String, String> map = new HashMap<>();
+    HashMap<String, String> map = new HashMap<>();
     map.put("hello", "AAA");
     map.put("world", "BBB");
     PullResult pull = defaultUserClient.pull("key1", map);

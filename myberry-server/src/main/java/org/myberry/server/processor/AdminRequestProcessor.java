@@ -23,23 +23,24 @@
 */
 package org.myberry.server.processor;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.List;
-import org.myberry.common.Component;
-import org.myberry.common.RunningMode;
+import org.myberry.common.ProduceMode;
+import org.myberry.common.codec.LightCodec;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.protocol.RequestCode;
 import org.myberry.common.protocol.ResponseCode;
-import org.myberry.common.protocol.body.CRComponentData;
-import org.myberry.common.protocol.body.NSComponentData;
+import org.myberry.common.protocol.body.admin.AllCRComponentData;
+import org.myberry.common.protocol.body.admin.AllNSComponentData;
+import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.NSComponentData;
+import org.myberry.common.protocol.body.admin.PageData;
 import org.myberry.common.protocol.header.admin.ManageComponentRequestHeader;
 import org.myberry.common.protocol.header.admin.ManageComponentResponseHeader;
 import org.myberry.remoting.netty.NettyRequestProcessor;
 import org.myberry.remoting.protocol.RemotingCommand;
 import org.myberry.server.ServerController;
-import org.myberry.store.AdminManageResult;
+import org.myberry.server.impl.AdminManageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,23 +70,28 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
       return response;
     }
 
-    RemotingCommand response = RemotingCommand.createResponseCommand(null);
+    RemotingCommand response = null;
     switch (request.getCode()) {
       case RequestCode.CREATE_COMPONENT:
-        if (RunningMode.CR.getRunningName().equals(requestHeader.getRunningMode())) {
-          CRComponentData crComponentData = CRComponentData.decode(request.getBody(), true);
+        if (ProduceMode.CR.getProduceName().equals(requestHeader.getProduceMode())) {
+
+          CRComponentData crComponentData =
+              LightCodec.toObj(request.getBody(), CRComponentData.class);
           response = createCRComponent(crComponentData);
-        } else if (RunningMode.NS.getRunningName().equals(requestHeader.getRunningMode())) {
-          NSComponentData nsComponentData = NSComponentData.decode(request.getBody(), true);
+        } else if (ProduceMode.NS.getProduceName().equals(requestHeader.getProduceMode())) {
+
+          NSComponentData nsComponentData =
+              LightCodec.toObj(request.getBody(), NSComponentData.class);
           response = createNSComponent(nsComponentData);
         } else {
           response = RemotingCommand.createResponseCommand(null);
-          response.setCode(ResponseCode.DIFF_RUNNING_MODE);
+          response.setCode(ResponseCode.DIFF_PRODUCE_MODE);
           response.setRemark("Client mode and server mode are different.");
         }
         break;
       case RequestCode.QUERY_ALL_COMPONENT:
-        response = queryAllComponent(response);
+        PageData pageData = LightCodec.toObj(request.getBody(), PageData.class);
+        response = queryAllComponent(pageData);
         break;
       default:
         break;
@@ -103,7 +109,7 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
 
     AdminManageResult result =
         serverController
-            .getMyberryStore()
+            .getMyberryService()
             .addComponent(crComponentData.getKey(), crComponentData.getExpression());
 
     log.info(
@@ -119,7 +125,7 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
 
     AdminManageResult result =
         serverController
-            .getMyberryStore()
+            .getMyberryService()
             .addComponent(
                 nsComponentData.getKey(),
                 nsComponentData.getValue(),
@@ -146,12 +152,34 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
     return response;
   }
 
-  private RemotingCommand queryAllComponent(RemotingCommand response) {
+  private RemotingCommand queryAllComponent(PageData pageData) {
 
-    List<Component> queryAllComponent = serverController.getMyberryStore().queryAllComponent();
+    ManageComponentResponseHeader responseHeader = new ManageComponentResponseHeader();
+    responseHeader.setKey("");
+    responseHeader.setProduceMode(serverController.getStoreConfig().getProduceMode());
 
+    RemotingCommand response = RemotingCommand.createResponseCommand(null);
+
+    Object queryAllComponent =
+        serverController
+            .getMyberryService()
+            .queryComponentList(pageData.getPageNo(), pageData.getPageSize());
+    if (ProduceMode.CR
+        .getProduceName()
+        .equals(serverController.getStoreConfig().getProduceMode())) {
+      AllCRComponentData allCRComponentData = new AllCRComponentData();
+      allCRComponentData.setComponents((List<CRComponentData>) queryAllComponent);
+      response.setBody(LightCodec.toBytes(allCRComponentData));
+    } else if (ProduceMode.NS
+        .getProduceName()
+        .equals(serverController.getStoreConfig().getProduceMode())) {
+      AllNSComponentData allNSComponentData = new AllNSComponentData();
+      allNSComponentData.setComponents((List<NSComponentData>) queryAllComponent);
+      response.setBody(LightCodec.toBytes(allNSComponentData));
+    }
+
+    response.writeCustomHeader(responseHeader);
     response.setCode(ResponseCode.SUCCESS);
-    response.setBody(JSON.toJSONBytes(queryAllComponent, SerializerFeature.WriteNullListAsEmpty));
     response.setRemark(null);
 
     return response;

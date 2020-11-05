@@ -23,9 +23,8 @@
 */
 package org.myberry.store;
 
-import java.util.List;
-import java.util.Map;
-import org.myberry.common.Component;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentMap;
 import org.myberry.store.config.StoreConfig;
 
 /**
@@ -45,10 +44,13 @@ public interface MyberryStore {
   void shutdown();
 
   /** Add a component into store. */
-  AdminManageResult addComponent(Object... obj);
+  void addComponent(AbstractComponent abstractComponent);
 
-  /** Query all component. */
-  List<Component> queryAllComponent();
+  /** Remove a component into store. */
+  void removeComponent(String key);
+
+  /** Query All component. */
+  Collection<AbstractComponent> queryAllComponent();
 
   /** Got persistent mbid. */
   long getMbidFromDisk();
@@ -65,14 +67,17 @@ public interface MyberryStore {
   /** Got persistent componentCount. */
   int getComponentCountFromDisk();
 
-  /** Got persistent runningMode. */
-  int getRunningModeFromDisk();
-
-  /** Get a new id. */
-  PullIdResult getNewId(String key, Map<String, String> attachments);
+  /** Got persistent produceMode. */
+  int getProduceModeFromDisk();
 
   /** Get Store Config. */
   StoreConfig getStoreConfig();
+
+  /**
+   * Get component map.
+   * @return
+   */
+  ConcurrentMap<String, AbstractComponent> getComponentMap();
 
   /**
    * Return the current timestamp of the store.
@@ -83,6 +88,12 @@ public interface MyberryStore {
 
   /** * Get PhysicalFile last offset. */
   int getLastOffset();
+
+  /** Data file write status. */
+  boolean isWriteFull(int size);
+
+  /** Index key existence status. */
+  boolean isExistKey(String key);
 
   /**
    * Get byteBuffer for ha send data.
@@ -99,6 +110,9 @@ public interface MyberryStore {
    */
   void setSyncByteBuffer(byte[] src);
 
+  /** Increase mbid. */
+  void incrMbid();
+
   /** Set persistent my sid. */
   void setMySid(int mySid);
 
@@ -110,6 +124,17 @@ public interface MyberryStore {
 
   /** Set component count. */
   void setComponentCount(int componentCount);
+
+  /** Flush disk. */
+  void save();
+
+  /**
+   * Update buffer
+   *
+   * @param index
+   * @param value
+   */
+  void updateBufferLong(int index, long value);
 
   /**
    * Check if the operation system page cache is busy or not.
@@ -124,4 +149,11 @@ public interface MyberryStore {
    * @return
    */
   boolean hasShutdown();
+
+  /**
+   * Set flush disk begin time.
+   *
+   * @param beginTimeInLock
+   */
+  void setBeginTimeInLock(long beginTimeInLock);
 }

@@ -25,10 +25,9 @@ package org.myberry.common.expression.exception;
 
 public class GenerateExpressionException extends ExpressionException {
 
-	private static final long serialVersionUID = -7226456128088226235L;
-	
-	public GenerateExpressionException(String message) {
-		super(message);
-	}
+  private static final long serialVersionUID = -7226456128088226235L;
 
+  public GenerateExpressionException(String message) {
+    super(message);
+  }
 }

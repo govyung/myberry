@@ -30,45 +30,45 @@ import org.slf4j.LoggerFactory;
 
 public class ExpressionObject {
 
-	private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
+  private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
-	private final String[] placeholders;
-	private int index = -1;
+  private final String[] placeholders;
+  private int index = -1;
 
-	public ExpressionObject(int capacity) {
-		this.placeholders = new String[capacity];
-	}
+  public ExpressionObject(int capacity) {
+    this.placeholders = new String[capacity];
+  }
 
-	public ExpressionObject addPlaceholder(String placeholder) throws GenerateExpressionException {
-		index++;
-		if (index > placeholders.length - 1) {
-			throw new GenerateExpressionException("expressionObject capacity not enough");
-		}
+  public ExpressionObject addPlaceholder(String placeholder) throws GenerateExpressionException {
+    index++;
+    if (index > placeholders.length - 1) {
+      throw new GenerateExpressionException("expressionObject capacity not enough");
+    }
 
-		placeholders[index] = placeholder;
-		return this;
-	}
+    placeholders[index] = placeholder;
+    return this;
+  }
 
-	@Override
-	public String toString() {
-		if (index != placeholders.length - 1) {
-			try {
-				throw new GenerateExpressionException("expressionObject capacity has surplus");
-			} catch (GenerateExpressionException e) {
-				log.error("error expression: ", e);
-			}
-		}
+  @Override
+  public String toString() {
+    if (index != placeholders.length - 1) {
+      try {
+        throw new GenerateExpressionException("expressionObject capacity has surplus");
+      } catch (GenerateExpressionException e) {
+        log.error("error expression: ", e);
+      }
+    }
 
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for (int i = 0; i < placeholders.length; i++) {
-			sb.append(placeholders[i]);
-			if (i != placeholders.length - 1) {
-				sb.append(" ");
-			}
-		}
-		sb.append("]");
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    for (int i = 0; i < placeholders.length; i++) {
+      sb.append(placeholders[i]);
+      if (i != placeholders.length - 1) {
+        sb.append(" ");
+      }
+    }
+    sb.append("]");
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 }

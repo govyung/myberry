@@ -27,8 +27,7 @@ import org.myberry.client.exception.MyberryClientException;
 
 public interface MyberryClient {
 
-	void start() throws MyberryClientException;
+  void start() throws MyberryClientException;
 
-	void shutdown();
-
+  void shutdown();
 }

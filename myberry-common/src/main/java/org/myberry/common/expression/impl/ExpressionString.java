@@ -25,19 +25,18 @@ package org.myberry.common.expression.impl;
 
 public class ExpressionString {
 
-	private String expression;
+  private String expression;
 
-	public ExpressionString(String expression) {
-		this.expression = expression;
-	}
+  public ExpressionString(String expression) {
+    this.expression = expression;
+  }
 
-	public void setExpression(String expression) {
-		this.expression = expression;
-	}
+  public void setExpression(String expression) {
+    this.expression = expression;
+  }
 
-	@Override
-	public String toString() {
-		return expression;
-	}
-
+  @Override
+  public String toString() {
+    return expression;
+  }
 }

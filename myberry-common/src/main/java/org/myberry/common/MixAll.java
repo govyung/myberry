@@ -29,8 +29,7 @@ import java.util.Properties;
 
 public class MixAll {
 
-  private MixAll() {
-  }
+  private MixAll() {}
 
   public static final String MYBERRY_HOME_ENV = "MYBERRY_HOME";
   public static final String MYBERRY_HOME_PROPERTY = "myberry.home.dir";

@@ -23,7 +23,7 @@
 */
 package org.myberry.client.impl.user;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -85,33 +85,34 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
     this.asyncSenderExecutor = asyncSenderExecutor;
   }
 
-  public PullResult pull(String key, Map<String, String> attachments)
+  public PullResult pull(String key, HashMap<String, String> attachments)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     return this.pull(key, attachments, defaultUserClient.getPullMsgTimeout());
   }
 
-  public PullResult pull(String key, Map<String, String> attachments, long timeout)
+  public PullResult pull(String key, HashMap<String, String> attachments, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     return this.pull(key, attachments, timeout, 0);
   }
 
-  public PullResult pull(String key, Map<String, String> attachments, long timeout, int timesRetry)
+  public PullResult pull(
+      String key, HashMap<String, String> attachments, long timeout, int timesRetry)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     return this.pullDefaultImpl(
         key, attachments, CommunicationMode.SYNC, null, timeout, timesRetry);
   }
 
-  public void pull(String key, Map<String, String> attachments, PullCallback pullCallback)
+  public void pull(String key, HashMap<String, String> attachments, PullCallback pullCallback)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     this.pull(key, attachments, pullCallback, defaultUserClient.getPullMsgTimeout());
   }
 
   public void pull(
-      String key, Map<String, String> attachments, PullCallback pullCallback, long timeout)
+      String key, HashMap<String, String> attachments, PullCallback pullCallback, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     this.pull(key, attachments, pullCallback, timeout, 0);
@@ -119,7 +120,7 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
 
   public void pull(
       String key,
-      Map<String, String> attachments,
+      HashMap<String, String> attachments,
       PullCallback pullCallback,
       long timeout,
       int timesRetry)
@@ -131,7 +132,7 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
 
   private PullResult pullDefaultImpl( //
       String key, //
-      Map<String, String> attachments, //
+      HashMap<String, String> attachments, //
       final CommunicationMode communicationMode, //
       final PullCallback pullCallback, //
       final long timeout, //

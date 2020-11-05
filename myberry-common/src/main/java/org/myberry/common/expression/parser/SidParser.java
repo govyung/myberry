@@ -27,17 +27,16 @@ import java.util.regex.Pattern;
 
 public class SidParser extends AbstractParser {
 
-	public static final String PREFIX = "#sid(";
-	private final Pattern pattern = Pattern.compile("^\\#sid\\(\\d+\\)$");
+  public static final String PREFIX = "#sid(";
+  private final Pattern pattern = Pattern.compile("^\\#sid\\(\\d+\\)$");
 
-	@Override
-	public Pattern getPattern() {
-		return pattern;
-	}
+  @Override
+  public Pattern getPattern() {
+    return pattern;
+  }
 
-	@Override
-	public int getBeginIndex() {
-		return PREFIX.length();
-	}
-
+  @Override
+  public int getBeginIndex() {
+    return PREFIX.length();
+  }
 }

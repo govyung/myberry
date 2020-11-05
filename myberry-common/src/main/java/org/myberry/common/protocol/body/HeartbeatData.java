@@ -24,22 +24,31 @@
 package org.myberry.common.protocol.body;
 
 import java.util.List;
+import org.myberry.common.codec.MessageLite;
+import org.myberry.common.codec.annotation.SerialField;
 import org.myberry.common.loadbalance.Invoker;
-import org.myberry.remoting.protocol.RemotingSerializable;
 
-public class HeartbeatData extends RemotingSerializable {
+public class HeartbeatData implements MessageLite {
 
+  @SerialField(ordinal = 0)
   private String loadBalanceName;
+
+  @SerialField(ordinal = 1)
   private String maintainer;
+
+  @SerialField(ordinal = 2)
   private List<Invoker> invokers;
 
   /** ----only for admin----> */
+  @SerialField(ordinal = 3)
   private int monitorCode;
 
+  @SerialField(ordinal = 4)
   private String clusterName;
+
+  @SerialField(ordinal = 5)
   private String info;
   /** <----only for admin---- */
-
   public String getLoadBalanceName() {
     return loadBalanceName;
   }

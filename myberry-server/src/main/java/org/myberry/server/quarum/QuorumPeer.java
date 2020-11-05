@@ -33,7 +33,6 @@ import org.myberry.remoting.netty.NettyServerConfig;
 import org.myberry.server.common.LoggerName;
 import org.myberry.server.routeinfo.RouteInfoManager;
 import org.myberry.store.MyberryStore;
-import org.myberry.store.Quorum;
 import org.myberry.store.config.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,16 +80,15 @@ public class QuorumPeer implements Quorum {
     this.serverConfig = serverConfig;
     this.mySid = this.storeConfig.getMySid();
     this.routeInfoManager = routeInfoManager;
-    this.initialize(myberryStore);
   }
 
   private void initialize(MyberryStore myberryStore) throws IllegalArgumentException {
     int mySidFromSettings = myberryStore.getStoreConfig().getMySid();
     int mySidFromDisk = myberryStore.getMySidFromDisk();
     if (mySidFromDisk == 0 && mySidFromSettings > 0) {
-      this.myberryStore.setMySid(mySidFromSettings);
+      myberryStore.setMySid(mySidFromSettings);
       log.info(
-          "*****  mysid first initialized, mysid: {}  *****", this.myberryStore.getMySidFromDisk());
+          "*****  mysid first initialized, mysid: {}  *****", myberryStore.getMySidFromDisk());
     } else if (mySidFromSettings > 0 && mySidFromSettings == mySidFromDisk) {
       log.info("*****  mysid: {}  *****", mySidFromSettings);
     } else {
@@ -104,6 +102,8 @@ public class QuorumPeer implements Quorum {
 
   @Override
   public void start() throws Exception {
+    this.initialize(myberryStore);
+
     this.newElection();
 
     waitElect.await();
@@ -112,14 +112,14 @@ public class QuorumPeer implements Quorum {
   public void newElection() throws Exception {
     log.info("=============================================================================");
     log.info(
-        "mbid: {}, offset: {}, epoch: {}, maxSid: {}, mySid: {}, componentCount: {}, runningMode: {}",
+        "mbid: {}, offset: {}, epoch: {}, maxSid: {}, mySid: {}, componentCount: {}, produceMode: {}",
         myberryStore.getMbidFromDisk(),
         myberryStore.getLastOffset(),
         myberryStore.getEpochFromDisk(),
         myberryStore.getMaxSidFromDisk(),
         myberryStore.getMySidFromDisk(),
         myberryStore.getComponentCountFromDisk(),
-        myberryStore.getRunningModeFromDisk());
+        myberryStore.getProduceModeFromDisk());
     log.info("=============================================================================");
 
     this.setLooking(true);

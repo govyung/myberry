@@ -30,15 +30,14 @@ import org.myberry.common.expression.Parser;
 
 public class NumberParser implements Parser {
 
-	private final Pattern pattern = Pattern.compile("[0-9]");
+  private final Pattern pattern = Pattern.compile("[0-9]");
 
-	@Override
-	public boolean doParse(String placeholder) {
-		Matcher isNum = pattern.matcher(placeholder);
-		if (!isNum.matches()) {
-			return false;
-		}
-		return true;
-	}
-
+  @Override
+  public boolean doParse(String placeholder) {
+    Matcher isNum = pattern.matcher(placeholder);
+    if (!isNum.matches()) {
+      return false;
+    }
+    return true;
+  }
 }

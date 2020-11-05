@@ -57,7 +57,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Vote.create(sid, electionEpoch, leader, offset, peerEpoch));
@@ -74,7 +74,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Vote.create(sid, electionEpoch, leader, offset, peerEpoch));
@@ -90,7 +90,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Inform.create(self.getMySid(), leader, peerEpoch));
@@ -106,7 +106,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Ack.create(
@@ -129,7 +129,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Notification.create(
@@ -150,7 +150,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Proposal.create(self.getMySid(), self.getMyberryStore().getLastOffset()));
@@ -169,7 +169,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Sync.create(
@@ -191,7 +191,7 @@ public class MessageHandler {
         ByteBuf.create(
             QuorumPeer.VERSION,
             self.getClusterName(),
-            self.getMyberryStore().getRunningModeFromDisk(),
+            self.getMyberryStore().getProduceModeFromDisk(),
             self.getStoreConfig().getFileSize(),
             self.getMySid(),
             Refuse.create(self.getMySid(), msg));
@@ -217,7 +217,7 @@ public class MessageHandler {
                 ByteBuf.create(
                     QuorumPeer.VERSION,
                     self.getClusterName(),
-                    self.getMyberryStore().getRunningModeFromDisk(),
+                    self.getMyberryStore().getProduceModeFromDisk(),
                     self.getStoreConfig().getFileSize(),
                     sid,
                     sync),
@@ -234,7 +234,7 @@ public class MessageHandler {
                 ByteBuf.create(
                     QuorumPeer.VERSION,
                     self.getClusterName(),
-                    self.getMyberryStore().getRunningModeFromDisk(),
+                    self.getMyberryStore().getProduceModeFromDisk(),
                     self.getStoreConfig().getFileSize(),
                     sid,
                     proposal),

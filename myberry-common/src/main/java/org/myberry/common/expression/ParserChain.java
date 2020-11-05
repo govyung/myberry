@@ -28,27 +28,26 @@ import java.util.List;
 
 public class ParserChain implements Parser {
 
-	private final List<Parser> parsers = new ArrayList<Parser>();
+  private final List<Parser> parsers = new ArrayList<Parser>();
 
-	public ParserChain addParser(Parser parser) {
-		parsers.add(parser);
-		return this;
-	}
+  public ParserChain addParser(Parser parser) {
+    parsers.add(parser);
+    return this;
+  }
 
-	public void removeAllParser() {
-		parsers.clear();
-	}
+  public void removeAllParser() {
+    parsers.clear();
+  }
 
-	@Override
-	public boolean doParse(String placeholder) {
-		boolean flag = false;
-		for (Parser parser : parsers) {
-			if (parser.doParse(placeholder)) {
-				flag = true;
-				break;
-			}
-		}
-		return flag;
-	}
-
+  @Override
+  public boolean doParse(String placeholder) {
+    boolean flag = false;
+    for (Parser parser : parsers) {
+      if (parser.doParse(placeholder)) {
+        flag = true;
+        break;
+      }
+    }
+    return flag;
+  }
 }

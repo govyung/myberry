@@ -28,8 +28,8 @@ import org.myberry.remoting.common.RemotingHelper;
 
 public class ClientConfig {
 
-  private String serverAddr = System.getProperty(MixAll.MYBERRY_ADDR_PROPERTY,
-      System.getenv(MixAll.MYBERRY_ADDR_ENV));
+  private String serverAddr =
+      System.getProperty(MixAll.MYBERRY_ADDR_PROPERTY, System.getenv(MixAll.MYBERRY_ADDR_ENV));
 
   private String clientIP = RemotingHelper.getPhyLocalAddress();
   private String instanceName = System.getProperty("myberry.client.name", "DEFAULT");
@@ -109,5 +109,4 @@ public class ClientConfig {
   public void setUnitName(String unitName) {
     this.unitName = unitName;
   }
-
 }

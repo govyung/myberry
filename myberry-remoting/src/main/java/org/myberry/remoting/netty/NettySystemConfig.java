@@ -28,23 +28,23 @@ package org.myberry.remoting.netty;
 
 public class NettySystemConfig {
 
-	public static final String MYBERRY_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE =
-	        "myberry.remoting.nettyPooledByteBufAllocatorEnable";
-	public static final String MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE = //
-	        "myberry.remoting.socket.sndbuf.size";
-	public static final String MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE = //
-	        "myberry.remoting.socket.rcvbuf.size";
-	public static final String MYBERRY_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE = //
-			"myberry.remoting.clientAsyncSemaphoreValue";
-	public static final String MYBERRY_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE = //
-			"myberry.remoting.clientOnewaySemaphoreValue";
+  public static final String MYBERRY_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE =
+      "myberry.remoting.nettyPooledByteBufAllocatorEnable";
+  public static final String MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE = //
+      "myberry.remoting.socket.sndbuf.size";
+  public static final String MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE = //
+      "myberry.remoting.socket.rcvbuf.size";
+  public static final String MYBERRY_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE = //
+      "myberry.remoting.clientAsyncSemaphoreValue";
+  public static final String MYBERRY_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE = //
+      "myberry.remoting.clientOnewaySemaphoreValue";
 
-	public static final int CLIENT_ASYNC_SEMAPHORE_VALUE = //
-			Integer.parseInt(System.getProperty(MYBERRY_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE, "65535"));
-	public static final int CLIENT_ONEWAY_SEMAPHORE_VALUE = //
-			Integer.parseInt(System.getProperty(MYBERRY_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE, "65535"));
-	public static int socketSndbufSize = //
-			Integer.parseInt(System.getProperty(MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE, "65535"));
-	public static int socketRcvbufSize = //
-			Integer.parseInt(System.getProperty(MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE, "65535"));
+  public static final int CLIENT_ASYNC_SEMAPHORE_VALUE = //
+      Integer.parseInt(System.getProperty(MYBERRY_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE, "65535"));
+  public static final int CLIENT_ONEWAY_SEMAPHORE_VALUE = //
+      Integer.parseInt(System.getProperty(MYBERRY_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE, "65535"));
+  public static int socketSndbufSize = //
+      Integer.parseInt(System.getProperty(MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE, "65535"));
+  public static int socketRcvbufSize = //
+      Integer.parseInt(System.getProperty(MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE, "65535"));
 }

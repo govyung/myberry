@@ -25,6 +25,4 @@ package org.myberry.common.expression;
 
 import org.myberry.common.plugin.MyBerryPlugins;
 
-public interface ParserPlugins extends MyBerryPlugins {
-
-}
+public interface ParserPlugins extends MyBerryPlugins {}

@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.myberry.store.AbstractComponent;
 import org.myberry.store.common.LoggerName;
 import org.myberry.store.config.StoreConfig;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class StoreComponent {
           String
           /** key */
           ,
-          AbstractComponent>
+      AbstractComponent>
       componentMap = new ConcurrentHashMap<String, AbstractComponent>();
 
   private final MappedByteBuffer mappedByteBuffer;

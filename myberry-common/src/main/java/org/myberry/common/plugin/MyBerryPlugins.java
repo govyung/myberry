@@ -25,7 +25,7 @@ package org.myberry.common.plugin;
 
 public interface MyBerryPlugins {
 
-	void registerDefaultPlugins();
+  void registerDefaultPlugins();
 
-	void unRegisterDefaultPlugins();
+  void unRegisterDefaultPlugins();
 }

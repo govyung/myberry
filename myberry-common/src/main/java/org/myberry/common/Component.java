@@ -23,7 +23,9 @@
 */
 package org.myberry.common;
 
-public interface Component {
+import org.myberry.common.codec.MessageLite;
 
-  byte[] encode(boolean nullCheck);
+public interface Component extends MessageLite {
+
+  byte[] encode();
 }

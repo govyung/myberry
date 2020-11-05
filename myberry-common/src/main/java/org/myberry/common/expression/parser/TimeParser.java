@@ -27,20 +27,19 @@ import org.myberry.common.expression.Parser;
 
 public class TimeParser implements Parser {
 
-	public static final String TIME_DAY = "#time(day)";
-	public static final String TIME_MONTH = "#time(month)";
-	public static final String TIME_YEAR = "#time(year)";
+  public static final String TIME_DAY = "#time(day)";
+  public static final String TIME_MONTH = "#time(month)";
+  public static final String TIME_YEAR = "#time(year)";
 
-	private final String[] timeParser = { TIME_DAY, TIME_MONTH, TIME_YEAR };
+  private final String[] timeParser = {TIME_DAY, TIME_MONTH, TIME_YEAR};
 
-	@Override
-	public boolean doParse(String placeholder) {
-		for (int i = 0; i < timeParser.length; i++) {
-			if (placeholder.equals(timeParser[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-
+  @Override
+  public boolean doParse(String placeholder) {
+    for (int i = 0; i < timeParser.length; i++) {
+      if (placeholder.equals(timeParser[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

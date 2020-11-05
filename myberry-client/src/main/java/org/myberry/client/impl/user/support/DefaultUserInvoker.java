@@ -53,7 +53,7 @@ public class DefaultUserInvoker {
 
   public PullResult pull( //
       final CommandCustomHeader requstHeader, //
-      final Map<String, String> attachments, //
+      final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode //
@@ -72,7 +72,7 @@ public class DefaultUserInvoker {
 
   public PullResult pull( //
       final CommandCustomHeader requstHeader, //
-      final Map<String, String> attachments, //
+      final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode, //

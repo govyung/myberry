@@ -25,13 +25,13 @@ package org.myberry.common.protocol.header.user;
 
 import org.myberry.remoting.CommandCustomHeader;
 import org.myberry.remoting.annotation.CFNotNull;
-import org.myberry.remoting.annotation.CFNullable;
 import org.myberry.remoting.exception.RemotingCommandException;
 
 public class PullIdBackRequestHeader implements CommandCustomHeader {
 
   @CFNotNull private String key;
-  @CFNullable private String newId;
+
+  private int produceCode;
 
   @Override
   public void checkFields() throws RemotingCommandException {}
@@ -44,11 +44,11 @@ public class PullIdBackRequestHeader implements CommandCustomHeader {
     this.key = key;
   }
 
-  public String getNewId() {
-    return newId;
+  public int getProduceCode() {
+    return produceCode;
   }
 
-  public void setNewId(String newId) {
-    this.newId = newId;
+  public void setProduceCode(int produceCode) {
+    this.produceCode = produceCode;
   }
 }

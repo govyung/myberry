@@ -30,6 +30,7 @@ import org.myberry.remoting.exception.RemotingCommandException;
 public class ManageComponentResponseHeader implements CommandCustomHeader {
 
   @CFNotNull private String key;
+  private String produceMode;
 
   @Override
   public void checkFields() throws RemotingCommandException {}
@@ -40,5 +41,13 @@ public class ManageComponentResponseHeader implements CommandCustomHeader {
 
   public void setKey(String key) {
     this.key = key;
+  }
+
+  public String getProduceMode() {
+    return produceMode;
+  }
+
+  public void setProduceMode(String produceMode) {
+    this.produceMode = produceMode;
   }
 }

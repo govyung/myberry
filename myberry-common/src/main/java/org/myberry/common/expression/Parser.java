@@ -25,5 +25,5 @@ package org.myberry.common.expression;
 
 public interface Parser {
 
-	boolean doParse(String placeholder);
+  boolean doParse(String placeholder);
 }

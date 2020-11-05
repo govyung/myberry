@@ -1,7 +1,7 @@
 /*
-* MIT License
-*
-* Copyright (c) 2020 gaoyang
+ * MIT License
+ *
+ * Copyright (c) 2020 gaoyang
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,6 +21,7 @@
 package org.myberry.server.processor;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.myberry.common.codec.LightCodec;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.monitor.MonitorCode;
 import org.myberry.common.protocol.RequestCode;
@@ -84,7 +85,7 @@ public class ClientManageProcessor implements NettyRequestProcessor {
     }
 
     response.setCode(ResponseCode.SUCCESS);
-    response.setBody(heartbeatData.encode());
+    response.setBody(LightCodec.toBytes(heartbeatData));
     response.setRemark(null);
     return response;
   }

@@ -41,24 +41,24 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class NettyEncoder extends MessageToByteEncoder<RemotingCommand> {
 
-	private static final Logger log = LoggerFactory.getLogger(LoggerName.REMOTING_LOGGER_NAME);
+  private static final Logger log = LoggerFactory.getLogger(LoggerName.REMOTING_LOGGER_NAME);
 
-	@Override
-	protected void encode(ChannelHandlerContext ctx, RemotingCommand remotingCommand, ByteBuf out) throws Exception {
-		try {
-			ByteBuffer header = remotingCommand.encodeHeader();
-            out.writeBytes(header);
-            byte[] body = remotingCommand.getBody();
-            if (body != null) {
-                out.writeBytes(body);
-            }
-		} catch (Exception e) {
-			log.error("encode exception, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()), e);
-            if (remotingCommand != null) {
-                log.error(remotingCommand.toString());
-            }
-            RemotingUtil.closeChannel(ctx.channel());
-		} 
-	}
-
+  @Override
+  protected void encode(ChannelHandlerContext ctx, RemotingCommand remotingCommand, ByteBuf out)
+      throws Exception {
+    try {
+      ByteBuffer header = remotingCommand.encodeHeader();
+      out.writeBytes(header);
+      byte[] body = remotingCommand.getBody();
+      if (body != null) {
+        out.writeBytes(body);
+      }
+    } catch (Exception e) {
+      log.error("encode exception, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()), e);
+      if (remotingCommand != null) {
+        log.error(remotingCommand.toString());
+      }
+      RemotingUtil.closeChannel(ctx.channel());
+    }
+  }
 }

@@ -25,14 +25,13 @@ package org.myberry.common.protocol;
 
 public class RequestCode {
 
-	public static final int PULL_ID= 10;
+  public static final int PULL_ID = 10;
 
-	public static final int ADMIN_SETTINGS = 11;
+  public static final int ADMIN_SETTINGS = 11;
 
-	public static final int HEART_BEAT = 12;
+  public static final int HEART_BEAT = 12;
 
-	public static final int CREATE_COMPONENT = 20;
+  public static final int CREATE_COMPONENT = 20;
 
-	public static final int QUERY_ALL_COMPONENT = 21;
-
+  public static final int QUERY_ALL_COMPONENT = 21;
 }

@@ -30,15 +30,14 @@ import org.myberry.common.expression.Parser;
 
 public class LetterParser implements Parser {
 
-	private final Pattern pattern = Pattern.compile("[A-Za-z]");
+  private final Pattern pattern = Pattern.compile("[A-Za-z]");
 
-	@Override
-	public boolean doParse(String placeholder) {
-		Matcher isLetter = pattern.matcher(placeholder);
-		if (!isLetter.matches()) {
-			return false;
-		}
-		return true;
-	}
-
+  @Override
+  public boolean doParse(String placeholder) {
+    Matcher isLetter = pattern.matcher(placeholder);
+    if (!isLetter.matches()) {
+      return false;
+    }
+    return true;
+  }
 }

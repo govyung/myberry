@@ -29,5 +29,5 @@ package org.myberry.remoting;
 import org.myberry.remoting.exception.RemotingCommandException;
 
 public interface CommandCustomHeader {
-	void checkFields() throws RemotingCommandException;
+  void checkFields() throws RemotingCommandException;
 }

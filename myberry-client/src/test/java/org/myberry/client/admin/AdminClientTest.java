@@ -23,7 +23,7 @@
 */
 package org.myberry.client.admin;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,8 +31,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.myberry.client.exception.MyberryClientException;
 import org.myberry.client.exception.MyberryServerException;
-import org.myberry.common.protocol.body.CRComponentData;
-import org.myberry.common.protocol.body.NSComponentData;
+import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.NSComponentData;
 import org.myberry.common.strategy.StrategyDate;
 import org.myberry.remoting.exception.RemotingException;
 
@@ -78,7 +78,7 @@ public class AdminClientTest {
   @Test
   public void queryAllComponent()
       throws RemotingException, InterruptedException, MyberryServerException {
-    SendResult sendResult = defaultAdminClient.queryAllComponent();
+    SendResult sendResult = defaultAdminClient.queryAllComponent(0, 10);
     System.out.println(sendResult);
   }
 

@@ -25,7 +25,7 @@ package org.myberry.common.constant;
 
 public class LoggerName {
 
-	public static final String SERVER_LOGGER_NAME = "MyberryServer";
-	public static final String COMMON_LOGGER_NAME = "MyberryCommon";
-	public static final String CLIENT_LOGGER_NAME = "MyberryClient";
+  public static final String SERVER_LOGGER_NAME = "MyberryServer";
+  public static final String COMMON_LOGGER_NAME = "MyberryCommon";
+  public static final String CLIENT_LOGGER_NAME = "MyberryClient";
 }

@@ -23,9 +23,9 @@
 */
 package org.myberry.client.impl.admin;
 
+import org.myberry.client.admin.DefaultAdminClient;
 import org.myberry.client.admin.SendCallback;
 import org.myberry.client.admin.SendResult;
-import org.myberry.client.admin.DefaultAdminClient;
 import org.myberry.client.exception.MyberryServerException;
 import org.myberry.client.impl.AbstractClientImpl;
 import org.myberry.client.impl.CommunicationMode;
@@ -42,47 +42,47 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
     this.defaultAdminClient = defaultAdminClient;
   }
 
-  public SendResult createComponent(String password, String runningMode, byte[] componentData)
+  public SendResult createComponent(String password, String produceMode, byte[] componentData)
       throws RemotingException, InterruptedException, MyberryServerException {
     return this.createComponent(
-        password, runningMode, componentData, defaultAdminClient.getSendMsgTimeout());
+        password, produceMode, componentData, defaultAdminClient.getSendMsgTimeout());
   }
 
   public SendResult createComponent(
-      String password, String runningMode, byte[] componentData, long timeout)
+      String password, String produceMode, byte[] componentData, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
     return this.createComponentImpl(
-        password, runningMode, componentData, CommunicationMode.SYNC, null, timeout);
+        password, produceMode, componentData, CommunicationMode.SYNC, null, timeout);
   }
 
   public void createComponent(
-      String password, String runningMode, byte[] componentData, SendCallback sendCallback)
+      String password, String produceMode, byte[] componentData, SendCallback sendCallback)
       throws RemotingException, InterruptedException, MyberryServerException {
     this.createComponent(
-        password, runningMode, componentData, defaultAdminClient.getSendMsgTimeout(), sendCallback);
+        password, produceMode, componentData, defaultAdminClient.getSendMsgTimeout(), sendCallback);
   }
 
   public void createComponent(
       String password,
-      String runningMode,
+      String produceMode,
       byte[] componentData,
       long timeout,
       SendCallback sendCallback)
       throws RemotingException, InterruptedException, MyberryServerException {
     this.createComponentImpl(
-        password, runningMode, componentData, CommunicationMode.ASYNC, sendCallback, timeout);
+        password, produceMode, componentData, CommunicationMode.ASYNC, sendCallback, timeout);
   }
 
   private SendResult createComponentImpl( //
       String password, //
-      String runningMode, //
+      String produceMode, //
       byte[] componentData, //
       final CommunicationMode communicationMode, //
       final SendCallback sendCallback, //
       final long timeout //
       ) throws RemotingException, InterruptedException, MyberryServerException {
     ManageComponentRequestHeader manageComponentRequestHeader =
-        this.createAdminRequestHeader(password, runningMode);
+        this.createAdminRequestHeader(password, produceMode);
 
     SendResult pullResult = null;
     switch (communicationMode) {
@@ -119,27 +119,30 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
     return pullResult;
   }
 
-  public SendResult queryAllComponent(String password)
+  public SendResult queryAllComponent(byte[] pageData, String password)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.queryAllComponent(password, defaultAdminClient.getSendMsgTimeout());
+    return this.queryAllComponent(pageData, password, defaultAdminClient.getSendMsgTimeout());
   }
 
-  public SendResult queryAllComponent(String password, long timeout)
+  public SendResult queryAllComponent(byte[] pageData, String password, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.queryAllComponentImpl(password, CommunicationMode.SYNC, null, timeout);
+    return this.queryAllComponentImpl(pageData, password, CommunicationMode.SYNC, null, timeout);
   }
 
-  public void queryAllComponent(String password, SendCallback sendCallback)
+  public void queryAllComponent(byte[] pageData, String password, SendCallback sendCallback)
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.queryAllComponent(password, defaultAdminClient.getSendMsgTimeout(), sendCallback);
+    this.queryAllComponent(
+        pageData, password, defaultAdminClient.getSendMsgTimeout(), sendCallback);
   }
 
-  public void queryAllComponent(String password, long timeout, SendCallback sendCallback)
+  public void queryAllComponent(
+      byte[] pageData, String password, long timeout, SendCallback sendCallback)
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.queryAllComponentImpl(password, CommunicationMode.ASYNC, sendCallback, timeout);
+    this.queryAllComponentImpl(pageData, password, CommunicationMode.ASYNC, sendCallback, timeout);
   }
 
   private SendResult queryAllComponentImpl( //
+      byte[] pageData, //
       String password, //
       final CommunicationMode communicationMode, //
       final SendCallback sendCallback, //
@@ -157,6 +160,7 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
                 .queryAllComponent(
                     RequestCode.QUERY_ALL_COMPONENT,
                     defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
+                    pageData,
                     manageComponentRequestHeader,
                     timeout,
                     communicationMode,
@@ -170,6 +174,7 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
                 .queryAllComponent(
                     RequestCode.QUERY_ALL_COMPONENT,
                     defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
+                    pageData,
                     manageComponentRequestHeader,
                     timeout,
                     communicationMode);
@@ -182,10 +187,10 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
   }
 
   private ManageComponentRequestHeader createAdminRequestHeader(
-      String password, String runningMode) {
+      String password, String produceMode) {
     ManageComponentRequestHeader manageComponentRequestHeader = new ManageComponentRequestHeader();
     manageComponentRequestHeader.setPassword(password);
-    manageComponentRequestHeader.setRunningMode(runningMode);
+    manageComponentRequestHeader.setProduceMode(produceMode);
     return manageComponentRequestHeader;
   }
 }

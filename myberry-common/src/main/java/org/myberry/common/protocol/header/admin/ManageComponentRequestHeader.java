@@ -30,7 +30,7 @@ import org.myberry.remoting.exception.RemotingCommandException;
 public class ManageComponentRequestHeader implements CommandCustomHeader {
 
   @CFNotNull private String password;
-  @CFNotNull private String runningMode;
+  @CFNotNull private String produceMode;
 
   @Override
   public void checkFields() throws RemotingCommandException {}
@@ -43,11 +43,11 @@ public class ManageComponentRequestHeader implements CommandCustomHeader {
     this.password = password;
   }
 
-  public String getRunningMode() {
-    return runningMode;
+  public String getProduceMode() {
+    return produceMode;
   }
 
-  public void setRunningMode(String runningMode) {
-    this.runningMode = runningMode;
+  public void setProduceMode(String produceMode) {
+    this.produceMode = produceMode;
   }
 }

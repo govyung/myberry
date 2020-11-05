@@ -30,30 +30,29 @@ import org.myberry.common.expression.Parser;
 
 public class RandomParser implements Parser {
 
-	private String prefix = "#rand(";
-	private String suffix = ")";
-	private final int minLength = 1;
-	private final int maxLength = 2 << 3;
+  private String prefix = "#rand(";
+  private String suffix = ")";
+  private final int minLength = 1;
+  private final int maxLength = 2 << 3;
 
-	private final Pattern pattern = Pattern.compile("^[\\d]*$");
+  private final Pattern pattern = Pattern.compile("^[\\d]*$");
 
-	@Override
-	public boolean doParse(String placeholder) {
-		if (placeholder.startsWith(prefix) && placeholder.endsWith(suffix)) {
-			String slice = placeholder.substring(prefix.length(), placeholder.length() - 1);
-			Matcher matcher = pattern.matcher(slice);
-			if (matcher.matches()) {
-				int parseInt = Integer.parseInt(slice);
-				if (parseInt >= minLength && parseInt <= maxLength) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+  @Override
+  public boolean doParse(String placeholder) {
+    if (placeholder.startsWith(prefix) && placeholder.endsWith(suffix)) {
+      String slice = placeholder.substring(prefix.length(), placeholder.length() - 1);
+      Matcher matcher = pattern.matcher(slice);
+      if (matcher.matches()) {
+        int parseInt = Integer.parseInt(slice);
+        if (parseInt >= minLength && parseInt <= maxLength) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
-	public String getSeedLength(String placeholder) {
-		return placeholder.substring(prefix.length(), placeholder.length() - 1);
-	}
-
+  public String getSeedLength(String placeholder) {
+    return placeholder.substring(prefix.length(), placeholder.length() - 1);
+  }
 }

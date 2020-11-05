@@ -28,5 +28,5 @@ package org.myberry.remoting.common;
 
 public class LoggerName {
 
-	public static final String REMOTING_LOGGER_NAME = "MyberryRemoting";
+  public static final String REMOTING_LOGGER_NAME = "MyberryRemoting";
 }

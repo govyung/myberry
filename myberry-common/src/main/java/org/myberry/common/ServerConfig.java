@@ -33,6 +33,7 @@ public class ServerConfig {
       System.getProperty(MixAll.MYBERRY_HOME_PROPERTY, System.getenv(MixAll.MYBERRY_HOME_ENV));
 
   @ImportantField private String clusterName;
+
   @ImportantField
   private String haServerAddr =
       System.getProperty(MixAll.MYBERRY_ADDR_PROPERTY, System.getenv(MixAll.MYBERRY_ADDR_ENV));

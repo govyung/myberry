@@ -23,16 +23,19 @@
 */
 package org.myberry.server.processor;
 
-import com.alibaba.fastjson.JSON;
 import io.netty.channel.ChannelHandlerContext;
-import java.util.Map;
+import org.myberry.common.ProduceMode;
+import org.myberry.common.codec.LightCodec;
+import org.myberry.common.codec.Maps;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.protocol.ResponseCode;
+import org.myberry.common.protocol.body.user.CRPullResultData;
+import org.myberry.common.protocol.body.user.NSPullResultData;
 import org.myberry.common.protocol.header.user.PullIdBackRequestHeader;
 import org.myberry.remoting.netty.NettyRequestProcessor;
 import org.myberry.remoting.protocol.RemotingCommand;
 import org.myberry.server.ServerController;
-import org.myberry.store.PullIdResult;
+import org.myberry.server.impl.PullIdResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +59,8 @@ public class UserRequestProcessor implements NettyRequestProcessor {
         (PullIdBackRequestHeader) request.decodeCommandCustomHeader(PullIdBackRequestHeader.class);
     PullIdResult result =
         serverController
-            .getMyberryStore()
-            .getNewId(requestHeader.getKey(), JSON.parseObject(request.getBody(), Map.class));
+            .getMyberryService()
+            .getNewId(requestHeader.getKey(), Maps.deserialize(request.getBody()));
 
     if (ResponseCode.KEY_NOT_EXISTED == result.getRespCode()) {
       response.setCode(ResponseCode.KEY_NOT_EXISTED);
@@ -67,10 +70,21 @@ public class UserRequestProcessor implements NettyRequestProcessor {
       response.setCode(ResponseCode.SUCCESS);
       response.setRemark(null);
       responseHeader.setKey(requestHeader.getKey());
-      responseHeader.setNewId(result.getNewId());
+      responseHeader.setProduceCode(result.getProduceCode());
+      if (ProduceMode.CR.getProduceCode() == result.getProduceCode()) {
+        CRPullResultData crPullResultData = new CRPullResultData();
+        crPullResultData.setNewId(result.getNewId());
+        response.setBody(LightCodec.toBytes(crPullResultData));
+      } else if (ProduceMode.NS.getProduceCode() == result.getProduceCode()) {
+        NSPullResultData nsPullResultData = new NSPullResultData();
+        nsPullResultData.setStart(result.getStart());
+        nsPullResultData.setEnd(result.getEnd());
+        nsPullResultData.setSynergyId(result.getSynergyId());
+        response.setBody(LightCodec.toBytes(nsPullResultData));
+      }
     } else {
       response.setCode(result.getRespCode());
-      response.setRemark(result.getNewId());
+      response.setRemark(result.getRemark());
       responseHeader.setKey(requestHeader.getKey());
     }
 

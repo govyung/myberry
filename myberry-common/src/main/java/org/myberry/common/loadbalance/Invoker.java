@@ -23,9 +23,15 @@
 */
 package org.myberry.common.loadbalance;
 
-public class Invoker {
+import org.myberry.common.codec.MessageLite;
+import org.myberry.common.codec.annotation.SerialField;
 
+public class Invoker implements MessageLite {
+
+  @SerialField(ordinal = 0)
   private String addr;
+
+  @SerialField(ordinal = 1)
   private int weight;
 
   public Invoker() {}
@@ -70,20 +76,14 @@ public class Invoker {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     Invoker other = (Invoker) obj;
     if (addr == null) {
-      if (other.addr != null)
-        return false;
-    } else if (!addr.equals(other.addr))
-      return false;
-    if (weight != other.weight)
-      return false;
+      if (other.addr != null) return false;
+    } else if (!addr.equals(other.addr)) return false;
+    if (weight != other.weight) return false;
     return true;
   }
 

@@ -28,17 +28,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
-import java.util.List;
-import java.util.Map;
-import org.myberry.common.Component;
-import org.myberry.common.RunningMode;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentMap;
 import org.myberry.common.SystemClock;
 import org.myberry.store.common.LoggerName;
 import org.myberry.store.config.StoreConfig;
 import org.myberry.store.config.StorePathConfigHelper;
-import org.myberry.store.impl.AbstractStoreService;
-import org.myberry.store.impl.CRStoreService;
-import org.myberry.store.impl.NSStoreService;
+import org.myberry.store.impl.FileService;
+import org.myberry.store.impl.MappedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,75 +45,72 @@ public class DefaultMyberryStore implements MyberryStore {
 
   private volatile boolean shutdown = false;
 
-  private final AbstractStoreService abstractStoreService;
   private final StoreConfig storeConfig;
+  private final FileService fileService;
   private RandomAccessFile lockFile;
 
   private FileLock lock;
 
   private final SystemClock systemClock = SystemClock.getInstance();
+  private volatile long beginTimeInLock = 0;
 
   public DefaultMyberryStore(final StoreConfig storeConfig) throws IOException {
     this.storeConfig = storeConfig;
-
-    if (RunningMode.CR.getRunningName().equals(storeConfig.getRunningMode())) {
-      this.abstractStoreService = new CRStoreService(storeConfig);
-    } else if (RunningMode.NS.getRunningName().equals(storeConfig.getRunningMode())) {
-      this.abstractStoreService = new NSStoreService(storeConfig);
-    } else {
-      this.abstractStoreService = new CRStoreService(storeConfig);
-    }
+    this.fileService = new FileService(this);
     this.initProcessLock();
   }
 
   @Override
-  public AdminManageResult addComponent(Object... obj) {
-    return abstractStoreService.addComponent(obj);
+  public void addComponent(AbstractComponent abstractComponent) {
+    fileService.addComponent(abstractComponent);
   }
 
   @Override
-  public List<Component> queryAllComponent() {
-    return abstractStoreService.queryAllComponent();
+  public void removeComponent(String key) {}
+
+  @Override
+  public Collection<AbstractComponent> queryAllComponent() {
+    return fileService.queryAllComponent();
   }
 
   @Override
   public long getMbidFromDisk() {
-    return abstractStoreService.getMbid();
+    return fileService.getBlockFile(0).getMbid();
   }
 
   @Override
   public long getEpochFromDisk() {
-    return abstractStoreService.getEpoch();
+    return fileService.getBlockFile(0).getEpoch();
   }
 
   @Override
   public int getMaxSidFromDisk() {
-    return abstractStoreService.getMaxSid();
+    return fileService.getBlockFile(0).getMaxSid();
   }
 
   @Override
   public int getMySidFromDisk() {
-    return abstractStoreService.getMySid();
+    return fileService.getBlockFile(0).getMySid();
   }
 
   @Override
   public int getComponentCountFromDisk() {
-    return abstractStoreService.getComponentCount();
+    return fileService.getBlockFile(0).getComponentCount();
   }
 
   @Override
-  public int getRunningModeFromDisk() {
-    return abstractStoreService.getRunningMode();
-  }
-
-  @Override
-  public PullIdResult getNewId(String key, Map<String, String> attachments) {
-    return abstractStoreService.getNewId(key, attachments);
+  public int getProduceModeFromDisk() {
+    return fileService.getBlockFile(0).getProduceMode();
   }
 
   @Override
   public StoreConfig getStoreConfig() {
     return storeConfig;
+  }
+
+  @Override
+  public ConcurrentMap<String, AbstractComponent> getComponentMap() {
+    return fileService.getBlockFile(0).getComponentMap();
   }
 
   @Override
@@ -126,50 +120,75 @@ public class DefaultMyberryStore implements MyberryStore {
 
   @Override
   public int getLastOffset() {
-    return abstractStoreService.getLastOffset();
+    return fileService.getBlockFile(0).getLastOffset();
+  }
+
+  @Override
+  public boolean isWriteFull(int size) {
+    return fileService.getBlockFile(0).isWriteFull(size);
+  }
+
+  @Override
+  public boolean isExistKey(String key) {
+    return fileService.getBlockFile(0).isExistKey(key);
   }
 
   @Override
   public byte[] getSyncByteBuffer(int offset) {
-    return abstractStoreService.getSyncByteBuffer(offset);
+    return fileService.getBlockFile(0).getComponentByteArray(offset);
   }
 
   @Override
   public void setSyncByteBuffer(byte[] src) {
-    this.abstractStoreService.setSyncByteBuffer(src);
+    this.fileService.getBlockFile(0).setComponentByteBuffer(src);
+  }
+
+  @Override
+  public void incrMbid() {
+    this.fileService.getBlockFile(0).incrMbid();
   }
 
   @Override
   public void setMySid(int mySid) {
-    this.abstractStoreService.setMySid(mySid);
+    this.fileService.getBlockFile(0).setMySid(mySid);
   }
 
   @Override
   public void setMaxSid(int maxSid) {
-    this.abstractStoreService.setMaxSid(maxSid);
+    this.fileService.getBlockFile(0).setMaxSid(maxSid);
   }
 
   @Override
   public void setEpoch(long epoch) {
-    this.abstractStoreService.setEpoch(epoch);
+    this.fileService.getBlockFile(0).setEpoch(epoch);
   }
 
   @Override
   public void setComponentCount(int componentCount) {
-    this.abstractStoreService.setComponentCount(componentCount);
+    this.fileService.getBlockFile(0).setComponentCount(componentCount);
+  }
+
+  @Override
+  public void save() {
+    this.fileService.getBlockFile(0).save();
+  }
+
+  @Override
+  public void updateBufferLong(int index, long value) {
+    this.fileService.getBlockFile(0).updateBufferLong(index, value);
   }
 
   @Override
   public void start() throws Exception {
     this.startProcessLock();
-    this.abstractStoreService.start();
+    this.fileService.load(storeConfig);
   }
 
   @Override
   public void shutdown() {
     if (!this.shutdown) {
       this.shutdown = true;
-      this.abstractStoreService.shutdown();
+      this.fileService.unload();
     }
 
     this.closeProcessLock();
@@ -177,8 +196,7 @@ public class DefaultMyberryStore implements MyberryStore {
 
   @Override
   public boolean isOSPageCacheBusy() {
-    long begin = abstractStoreService.getBeginTimeInLock();
-    long diff = this.systemClock.now() - begin;
+    long diff = this.systemClock.now() - beginTimeInLock;
 
     return diff < 10000000 && diff > this.storeConfig.getOsPageCacheBusyTimeOutMills();
   }
@@ -216,7 +234,8 @@ public class DefaultMyberryStore implements MyberryStore {
     return shutdown;
   }
 
-  public AbstractStoreService getAbstractStoreService() {
-    return abstractStoreService;
+  @Override
+  public void setBeginTimeInLock(long beginTimeInLock) {
+    this.beginTimeInLock = beginTimeInLock;
   }
 }

@@ -29,13 +29,12 @@ import org.myberry.common.expression.Parser;
 
 public abstract class AbstractParser implements Parser {
 
-	public abstract Pattern getPattern();
+  public abstract Pattern getPattern();
 
-	public abstract int getBeginIndex();
+  public abstract int getBeginIndex();
 
-	@Override
-	public boolean doParse(String placeholder) {
-		return getPattern().matcher(placeholder).matches();
-	}
-
+  @Override
+  public boolean doParse(String placeholder) {
+    return getPattern().matcher(placeholder).matches();
+  }
 }

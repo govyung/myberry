@@ -23,14 +23,12 @@
  */
 package org.myberry.common;
 
-
 public class MyberryVersion {
 
-	public static final int CURRENT_VERSION = Version.V1_0_0.ordinal();
-	
-	public enum Version {
-		V1_0_0,
-		HIGHER_VERSION
-	}
-	
+  public static final int CURRENT_VERSION = Version.V1_0_0.ordinal();
+
+  public enum Version {
+    V1_0_0,
+    HIGHER_VERSION
+  }
 }

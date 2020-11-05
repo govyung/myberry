@@ -53,160 +53,179 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 
 public class ServerStartup {
 
-	public static Properties properties = null;
-	public static CommandLine commandLine = null;
-	public static Logger log;
+  public static Properties properties = null;
+  public static CommandLine commandLine = null;
+  public static Logger log;
 
-	public static void main(String[] args) {
-		start(createBrokerController(args));
-	}
+  public static void main(String[] args) {
+    start(createBrokerController(args));
+  }
 
-	public static ServerController start(ServerController controller) {
-		try {
-			controller.start();
-			String tip = "The server[" + RemotingHelper.getPhyLocalAddress() + ":"
-					+ controller.getNettyServerConfig().getListenPort() + "] boot success.";
+  public static ServerController start(ServerController controller) {
+    try {
+      controller.start();
+      String tip =
+          "The server["
+              + RemotingHelper.getPhyLocalAddress()
+              + ":"
+              + controller.getNettyServerConfig().getListenPort()
+              + "] boot success.";
 
-			if (null != controller.getServerConfig().getHaServerAddr()) {
-				tip += " and ha server is " + controller.getServerConfig().getHaServerAddr();
-			}
+      if (null != controller.getServerConfig().getHaServerAddr()) {
+        tip += " and ha server is " + controller.getServerConfig().getHaServerAddr();
+      }
 
-			log.info(tip);
-			return controller;
-		} catch (Throwable e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
+      log.info(tip);
+      return controller;
+    } catch (Throwable e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	public static ServerController createBrokerController(String[] args) {
-		System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MyberryVersion.CURRENT_VERSION));
+  public static ServerController createBrokerController(String[] args) {
+    System.setProperty(
+        RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MyberryVersion.CURRENT_VERSION));
 
-		if (null == System.getProperty(NettySystemConfig.MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE)) {
-			NettySystemConfig.socketSndbufSize = 131072;
-		}
+    if (null == System.getProperty(NettySystemConfig.MYBERRY_REMOTING_SOCKET_SNDBUF_SIZE)) {
+      NettySystemConfig.socketSndbufSize = 131072;
+    }
 
-		if (null == System.getProperty(NettySystemConfig.MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE)) {
-			NettySystemConfig.socketRcvbufSize = 131072;
-		}
+    if (null == System.getProperty(NettySystemConfig.MYBERRY_REMOTING_SOCKET_RCVBUF_SIZE)) {
+      NettySystemConfig.socketRcvbufSize = 131072;
+    }
 
-		try {
-			Options options = ServerUtils.buildCommandlineOptions(new Options());
-			commandLine = ServerUtils.parseCmdLine("myberryServer", args, buildCommandlineOptions(options),
-					new DefaultParser());
-			if (null == commandLine) {
-				System.exit(-1);
-			}
+    try {
+      Options options = ServerUtils.buildCommandlineOptions(new Options());
+      commandLine =
+          ServerUtils.parseCmdLine(
+              "myberryServer", args, buildCommandlineOptions(options), new DefaultParser());
+      if (null == commandLine) {
+        System.exit(-1);
+      }
 
-			final ServerConfig serverConfig = new ServerConfig();
-			final NettyServerConfig nettyServerConfig = new NettyServerConfig();
-			final StoreConfig storeConfig = new StoreConfig();
+      final ServerConfig serverConfig = new ServerConfig();
+      final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+      final StoreConfig storeConfig = new StoreConfig();
 
-			if (null == serverConfig.getMyberryHome()) {
-				System.out.printf("Please set the " + MixAll.MYBERRY_HOME_ENV
-						+ " variable in your environment to match the location of the Myberry installation");
-				System.exit(-2);
-			}
+      if (null == serverConfig.getMyberryHome()) {
+        System.out.printf(
+            "Please set the "
+                + MixAll.MYBERRY_HOME_ENV
+                + " variable in your environment to match the location of the Myberry installation");
+        System.exit(-2);
+      }
 
-			if (commandLine.hasOption('p')) {
-				EnvironmentUtils.printConfig(false, serverConfig, storeConfig);
-			} else if (commandLine.hasOption('m')) {
-				EnvironmentUtils.printConfig(true, serverConfig, storeConfig);
-			}
+      if (commandLine.hasOption('p')) {
+        EnvironmentUtils.printConfig(false, serverConfig, storeConfig);
+      } else if (commandLine.hasOption('m')) {
+        EnvironmentUtils.printConfig(true, serverConfig, storeConfig);
+      }
 
-			readMyberryProperties(serverConfig, nettyServerConfig, storeConfig);
+      readMyberryProperties(serverConfig, nettyServerConfig, storeConfig);
 
-			String haServerAddr = serverConfig.getHaServerAddr();
-			if (null != haServerAddr) {
-				try {
-					String[] addrArray = haServerAddr.split(",");
-					for (String addr : addrArray) {
-						RemotingUtil.string2SocketAddress(addr);
-					}
-				} catch (Exception e) {
-					System.out.printf(
-							"The HA Server Address[%s] illegal, please set it as follows, \"1@192.168.1.7:10737,2@192.168.1.8:10747,3@192.168.1.9:10757\"%n",
-							haServerAddr);
-					System.exit(-3);
-				}
-			}
+      String haServerAddr = serverConfig.getHaServerAddr();
+      if (null != haServerAddr) {
+        try {
+          String[] addrArray = haServerAddr.split(",");
+          for (String addr : addrArray) {
+            RemotingUtil.string2SocketAddress(addr);
+          }
+        } catch (Exception e) {
+          System.out.printf(
+              "The HA Server Address[%s] illegal, please set it as follows, \"1@192.168.1.7:10737,2@192.168.1.8:10747,3@192.168.1.9:10757\"%n",
+              haServerAddr);
+          System.exit(-3);
+        }
+      }
 
-			initLogback(serverConfig);
+      initLogback(serverConfig);
 
-			final ServerController controller = new ServerController( //
-					serverConfig, //
-					nettyServerConfig, //
-					storeConfig //
-			);
+      final ServerController controller =
+          new ServerController( //
+              serverConfig, //
+              nettyServerConfig, //
+              storeConfig //
+              );
 
-			boolean initResult = controller.initialize();
-			if (!initResult) {
-				controller.shutdown();
-				System.exit(-3);
-			}
+      boolean initResult = controller.initialize();
+      if (!initResult) {
+        controller.shutdown();
+        System.exit(-3);
+      }
 
-			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-				private volatile boolean hasShutdown = false;
-				private AtomicInteger shutdownTimes = new AtomicInteger(0);
+      Runtime.getRuntime()
+          .addShutdownHook(
+              new Thread(
+                  new Runnable() {
+                    private volatile boolean hasShutdown = false;
+                    private AtomicInteger shutdownTimes = new AtomicInteger(0);
 
-				@Override
-				public void run() {
-					synchronized (this) {
-						log.info("Shutdown hook was invoked, {}", this.shutdownTimes.incrementAndGet());
-						if (!this.hasShutdown) {
-							this.hasShutdown = true;
-							long beginTime = System.currentTimeMillis();
-							controller.shutdown();
-							long consumingTimeTotal = System.currentTimeMillis() - beginTime;
-							log.info("Shutdown hook over, consuming total time(ms): {}", consumingTimeTotal);
-						}
-					}
-				}
-			}, "ShutdownHook"));
-			return controller;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			System.exit(-1);
-		}
+                    @Override
+                    public void run() {
+                      synchronized (this) {
+                        log.info(
+                            "Shutdown hook was invoked, {}", this.shutdownTimes.incrementAndGet());
+                        if (!this.hasShutdown) {
+                          this.hasShutdown = true;
+                          long beginTime = System.currentTimeMillis();
+                          controller.shutdown();
+                          long consumingTimeTotal = System.currentTimeMillis() - beginTime;
+                          log.info(
+                              "Shutdown hook over, consuming total time(ms): {}",
+                              consumingTimeTotal);
+                        }
+                      }
+                    }
+                  },
+                  "ShutdownHook"));
+      return controller;
+    } catch (Throwable t) {
+      t.printStackTrace();
+      System.exit(-1);
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	private static void readMyberryProperties(final ServerConfig serverConfig,
-			final NettyServerConfig nettyServerConfig, final StoreConfig storeConfig) throws Exception {
-		String file = serverConfig.getMyberryHome() + "/conf/myberry.properties";
-		InputStream in = new BufferedInputStream(new FileInputStream(file));
-		properties = new Properties();
-		properties.load(in);
+  private static void readMyberryProperties(
+      final ServerConfig serverConfig,
+      final NettyServerConfig nettyServerConfig,
+      final StoreConfig storeConfig)
+      throws Exception {
+    String file = serverConfig.getMyberryHome() + "/conf/myberry.properties";
+    InputStream in = new BufferedInputStream(new FileInputStream(file));
+    properties = new Properties();
+    properties.load(in);
 
-		MixAll.properties2Object(properties, serverConfig);
-		MixAll.properties2Object(properties, nettyServerConfig);
-		MixAll.properties2Object(properties, storeConfig);
+    MixAll.properties2Object(properties, serverConfig);
+    MixAll.properties2Object(properties, nettyServerConfig);
+    MixAll.properties2Object(properties, storeConfig);
 
-		in.close();
-	}
+    in.close();
+  }
 
-	private static void initLogback(final ServerConfig serverConfig) throws Exception {
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		JoranConfigurator configurator = new JoranConfigurator();
-		configurator.setContext(lc);
-		lc.reset();
-		configurator.doConfigure(serverConfig.getMyberryHome() + "/conf/logback.xml");
+  private static void initLogback(final ServerConfig serverConfig) throws Exception {
+    LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+    JoranConfigurator configurator = new JoranConfigurator();
+    configurator.setContext(lc);
+    lc.reset();
+    configurator.doConfigure(serverConfig.getMyberryHome() + "/conf/logback.xml");
 
-		log = LoggerFactory.getLogger(LoggerName.SERVER_LOGGER_NAME);
-	}
+    log = LoggerFactory.getLogger(LoggerName.SERVER_LOGGER_NAME);
+  }
 
-	public static Options buildCommandlineOptions(final Options options) {
-		Option opt = new Option("p", "printConfigItem", false, "Print all config item");
-		opt.setRequired(false);
-		options.addOption(opt);
+  public static Options buildCommandlineOptions(final Options options) {
+    Option opt = new Option("p", "printConfigItem", false, "Print all config item");
+    opt.setRequired(false);
+    options.addOption(opt);
 
-		opt = new Option("m", "printImportantConfig", false, "Print important config item");
-		opt.setRequired(false);
-		options.addOption(opt);
+    opt = new Option("m", "printImportantConfig", false, "Print important config item");
+    opt.setRequired(false);
+    options.addOption(opt);
 
-		return options;
-	}
+    return options;
+  }
 }

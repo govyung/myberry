@@ -35,5 +35,5 @@ public class ResponseCode extends RemotingSysResponseCode {
 
   public static final int PASSWORD_ERROR = 13;
 
-  public static final int DIFF_RUNNING_MODE = 14;
+  public static final int DIFF_PRODUCE_MODE = 14;
 }

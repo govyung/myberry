@@ -24,11 +24,10 @@
 package org.myberry.common.expression.exception;
 
 public class ParseExpressionException extends ExpressionException {
-	
-	private static final long serialVersionUID = -2359805737639287785L;
 
-	public ParseExpressionException(String message) {
-		super(message);
-	}
+  private static final long serialVersionUID = -2359805737639287785L;
 
+  public ParseExpressionException(String message) {
+    super(message);
+  }
 }

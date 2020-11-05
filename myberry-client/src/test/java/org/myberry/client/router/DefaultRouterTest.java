@@ -201,5 +201,4 @@ public class DefaultRouterTest {
         RoundRobinLoadBalance.class.getSimpleName(),
         defaultRouter.getLoadBalance().getClass().getSimpleName());
   }
-
 }

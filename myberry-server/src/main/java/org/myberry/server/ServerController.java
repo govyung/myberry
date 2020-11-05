@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.myberry.common.RunningMode;
+import org.myberry.common.ProduceMode;
 import org.myberry.common.ServerConfig;
 import org.myberry.common.ThreadFactoryImpl;
 import org.myberry.common.expression.ParserPlugins;
@@ -37,14 +37,17 @@ import org.myberry.common.protocol.RequestCode;
 import org.myberry.remoting.RemotingServer;
 import org.myberry.remoting.netty.NettyRemotingServer;
 import org.myberry.remoting.netty.NettyServerConfig;
+import org.myberry.server.impl.CRService;
+import org.myberry.server.impl.MyberryService;
+import org.myberry.server.impl.NSService;
 import org.myberry.server.processor.AdminRequestProcessor;
 import org.myberry.server.processor.ClientManageProcessor;
 import org.myberry.server.processor.UserRequestProcessor;
+import org.myberry.server.quarum.Quorum;
 import org.myberry.server.quarum.QuorumPeer;
 import org.myberry.server.routeinfo.RouteInfoManager;
 import org.myberry.store.DefaultMyberryStore;
 import org.myberry.store.MyberryStore;
-import org.myberry.store.Quorum;
 import org.myberry.store.config.StoreConfig;
 
 public class ServerController {
@@ -55,8 +58,9 @@ public class ServerController {
   private final BlockingQueue<Runnable> userManagerThreadPoolQueue;
   private final BlockingQueue<Runnable> clientManagerThreadPoolQueue;
   private final BlockingQueue<Runnable> adminManagerThreadPoolQueue;
-  private ParserPlugins parserPlugins;
   private MyberryStore myberryStore;
+  private ParserPlugins parserPlugins;
+  private MyberryService myberryService;
   private RouteInfoManager routeInfoManager;
   private Quorum quorum;
   private RemotingServer remotingServer;
@@ -87,7 +91,15 @@ public class ServerController {
     boolean result = true;
     try {
       this.myberryStore = new DefaultMyberryStore(storeConfig);
-      initPlugins(storeConfig.getRunningMode());
+      initPlugins(storeConfig.getProduceMode());
+
+      if (ProduceMode.CR.getProduceName().equals(storeConfig.getProduceMode())) {
+        this.myberryService = new CRService(myberryStore);
+      } else if (ProduceMode.NS.getProduceName().equals(storeConfig.getProduceMode())) {
+        this.myberryService = new NSService(myberryStore);
+      } else {
+        this.myberryService = new CRService(myberryStore);
+      }
 
       if (serverConfig.getClusterName() != null) {
         this.routeInfoManager = new RouteInfoManager();
@@ -169,6 +181,10 @@ public class ServerController {
       this.parserPlugins.registerDefaultPlugins();
     }
 
+    if (this.myberryService != null) {
+      this.myberryService.start();
+    }
+
     if (this.quorum != null) {
       this.quorum.start();
     }
@@ -185,6 +201,10 @@ public class ServerController {
 
     if (this.quorum != null) {
       this.quorum.shutdown();
+    }
+
+    if (this.myberryService != null) {
+      this.myberryService.shutdown();
     }
 
     // parserPlugins
@@ -209,8 +229,8 @@ public class ServerController {
     }
   }
 
-  private void initPlugins(String runningMode) {
-    if (RunningMode.CR.getRunningName().equals(runningMode)) {
+  private void initPlugins(String produceMode) {
+    if (ProduceMode.CR.getProduceName().equals(produceMode)) {
       this.parserPlugins = ParserManager.getInstance();
     }
   }
@@ -229,6 +249,10 @@ public class ServerController {
 
   public MyberryStore getMyberryStore() {
     return myberryStore;
+  }
+
+  public MyberryService getMyberryService() {
+    return myberryService;
   }
 
   public RouteInfoManager getRouteInfoManager() {

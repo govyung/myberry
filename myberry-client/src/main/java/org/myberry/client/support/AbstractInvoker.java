@@ -23,8 +23,8 @@
 */
 package org.myberry.client.support;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.myberry.client.exception.MyberryClientException;
 import org.myberry.client.exception.MyberryServerException;
@@ -54,7 +54,7 @@ public abstract class AbstractInvoker {
   public abstract PullResult doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
       final CommandCustomHeader requstHeader, //
-      final Map<String, String> attachments, //
+      final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode //
@@ -63,7 +63,7 @@ public abstract class AbstractInvoker {
   public abstract void doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
       final CommandCustomHeader requstHeader, //
-      final Map<String, String> attachments, //
+      final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode,

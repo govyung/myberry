@@ -23,26 +23,26 @@
 */
 package org.myberry.store.util;
 
-import org.myberry.common.RunningMode;
-import org.myberry.store.impl.AbstractComponent;
-import org.myberry.store.impl.CRComponent;
-import org.myberry.store.impl.NSComponent;
+import org.myberry.common.ProduceMode;
+import org.myberry.store.AbstractComponent;
+import org.myberry.store.CRComponent;
+import org.myberry.store.NSComponent;
 
 public class MappingUtils {
 
-  public static int getRunningModeMapping(String runningMode) {
-    Integer code = RunningMode.getCode(runningMode);
+  public static int getProduceModeMapping(String produceName) {
+    Integer code = ProduceMode.getCode(produceName);
     if (code == null) {
-      return RunningMode.getCode(RunningMode.CR.getRunningName());
+      return ProduceMode.getCode(ProduceMode.CR.getProduceName());
     } else {
       return code.intValue();
     }
   }
 
-  public static AbstractComponent getComponentMapping(int runningMode) {
-    if (RunningMode.CR.getRunningCode() == runningMode) {
+  public static AbstractComponent getComponentMapping(int produceMode) {
+    if (ProduceMode.CR.getProduceCode() == produceMode) {
       return new CRComponent();
-    } else if (RunningMode.NS.getRunningCode() == runningMode) {
+    } else if (ProduceMode.NS.getProduceCode() == produceMode) {
       return new NSComponent();
     } else {
       return new CRComponent();

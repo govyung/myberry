@@ -24,6 +24,9 @@
 package org.myberry.client.admin;
 
 import java.lang.reflect.Field;
+import java.util.List;
+import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.NSComponentData;
 
 public class SendResult {
 
@@ -31,12 +34,17 @@ public class SendResult {
   private String remark;
 
   private String key;
-  private String result;
+  private List<CRComponentData> componentsOfCR;
 
-  public SendResult(SendStatus sendStatus, String key, String result) {
+  private List<NSComponentData> componentsOfNS;
+
+  public SendResult(SendStatus sendStatus) {
+    this.sendStatus = sendStatus;
+  }
+
+  public SendResult(SendStatus sendStatus, String key) {
     this.sendStatus = sendStatus;
     this.key = key;
-    this.result = result;
   }
 
   public SendStatus getSendStatus() {
@@ -63,20 +71,28 @@ public class SendResult {
     this.key = key;
   }
 
-  public String getResult() {
-    return result;
+  public List<CRComponentData> getComponentsOfCR() {
+    return componentsOfCR;
   }
 
-  public void setResult(String result) {
-    this.result = result;
+  public void setComponentsOfCR(List<CRComponentData> componentsOfCR) {
+    this.componentsOfCR = componentsOfCR;
+  }
+
+  public List<NSComponentData> getComponentsOfNS() {
+    return componentsOfNS;
+  }
+
+  public void setComponentsOfNS(List<NSComponentData> componentsOfNS) {
+    this.componentsOfNS = componentsOfNS;
   }
 
   @Override
   public String toString() {
-    Class<? extends SendResult> clz = this.getClass();
+    Class<?> clz = this.getClass();
     Field[] fields = clz.getDeclaredFields();
     StringBuilder builder = new StringBuilder();
-    builder.append("SendStatus [");
+    builder.append("SendResult [");
     for (int i = 0; i < fields.length; i++) {
       fields[i].setAccessible(true);
       Object obj = null;

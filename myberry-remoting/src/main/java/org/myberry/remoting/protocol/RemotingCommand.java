@@ -26,7 +26,6 @@
 */
 package org.myberry.remoting.protocol;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -73,6 +72,8 @@ public class RemotingCommand {
   private HashMap<String, String> extFields;
   private transient CommandCustomHeader customHeader;
   private transient byte[] body;
+
+  protected RemotingCommand() {}
 
   public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
     RemotingCommand cmd = new RemotingCommand();
@@ -134,10 +135,10 @@ public class RemotingCommand {
 
   /*
    * encode:
-   * +------+---------------+---------------+-------------+
-   * | Salt | Header Length | Actual Header | Actual Body |
-   * | 0x04 |      0x04     |       ?       |      ?      |
-   * +------+-------------------------------+-------------+
+   * +--------------+---------------+---------------+-------------+
+   * | Total Length | Header Length | Actual Header | Actual Body |
+   * |     0x04     |      0x04     |       ?       |      ?      |
+   * +--------------+-------------------------------+-------------+
    *
    * LengthFieldBasedFrameDecoder(*, 0, 4, 0, 4)
    *
@@ -169,7 +170,7 @@ public class RemotingCommand {
   }
 
   private static RemotingCommand headerDecode(byte[] headerData) {
-    return RemotingSerializable.decode(headerData, RemotingCommand.class);
+    return RemotingSerializable.decode(headerData);
   }
 
   public static int getHeaderLength(int length) {
@@ -177,13 +178,13 @@ public class RemotingCommand {
   }
 
   /*
-   * +------+---------------+---------------+-------------+
-   * | Salt | Header Length | Actual Header | Actual Body |
-   * | 0x04 |      0x04     |       ?       |      ?      |
-   * +------+-------------------------------+-------------+
+   * +--------------+---------------+---------------+-------------+
+   * | Total Length | Header Length | Actual Header | Actual Body |
+   * |     0x04     |      0x04     |       ?       |      ?      |
+   * +--------------+-------------------------------+-------------+
    */
   public ByteBuffer encode() {
-    // 1> header length size(salt)
+    // 1> header length size
     int length = 4;
 
     // 2> header data length
@@ -206,7 +207,7 @@ public class RemotingCommand {
     // header data
     result.put(headerData);
 
-    // body data;
+    // body data
     if (this.body != null) {
       result.put(this.body);
     }
@@ -221,13 +222,13 @@ public class RemotingCommand {
   }
 
   /*
-   * +------+---------------+---------------+
-   * | Salt | Header Length | Actual Header |
-   * | 0x04 |      0x04     |       ?       |
-   * +------+-------------------------------+
+   * +--------------+---------------+---------------+
+   * | Total Length | Header Length | Actual Header |
+   * |     0x04     |      0x04     |       ?       |
+   * +--------------+-------------------------------+
    */
   public ByteBuffer encodeHeader(final int bodyLength) {
-    // 1> header length size(salt)
+    // 1> header length size
     int length = 4;
 
     // 2> header data length
@@ -391,31 +392,6 @@ public class RemotingCommand {
     return name;
   }
 
-  public static Object parseForm(final ByteBuffer byteBuffer) {
-    byte version = byteBuffer.get();
-
-    switch (version) {
-      case 1:
-        return parseBody(byteBuffer);
-      default:
-        return parseBody(byteBuffer);
-    }
-  }
-
-  public static RemotingCommand parseBody(final ByteBuffer byteBuffer) {
-    short bodyLength = byteBuffer.getShort();
-
-    byte[] bodyData = null;
-    if (bodyLength > 0) {
-      bodyData = new byte[bodyLength];
-      byteBuffer.get(bodyData);
-    }
-
-    RemotingCommand cmd = RemotingSerializable.decode(bodyData, RemotingCommand.class);
-    cmd.body = bodyData;
-    return cmd;
-  }
-
   public CommandCustomHeader readCustomHeader() {
     return customHeader;
   }
@@ -424,15 +400,10 @@ public class RemotingCommand {
     this.customHeader = customHeader;
   }
 
-  public static AtomicInteger getRequestId() {
-    return requestId;
+  public static int createNewRequestId() {
+    return requestId.incrementAndGet();
   }
 
-  public static void setRequestId(AtomicInteger requestId) {
-    RemotingCommand.requestId = requestId;
-  }
-
-  @JSONField(serialize = false)
   public RemotingCommandType getType() {
     if (this.isResponseType()) {
       return RemotingCommandType.RESPONSE_COMMAND;
@@ -446,7 +417,6 @@ public class RemotingCommand {
     this.flag |= bits;
   }
 
-  @JSONField(serialize = false)
   public boolean isResponseType() {
     int bits = 1 << RPC_TYPE;
     return (this.flag & bits) == bits;
@@ -457,7 +427,6 @@ public class RemotingCommand {
     this.flag |= bits;
   }
 
-  @JSONField(serialize = false)
   public boolean isOnewayRPC() {
     int bits = 1 << RPC_ONEWAY;
     return (this.flag & bits) == bits;
@@ -535,7 +504,7 @@ public class RemotingCommand {
         .append(version) //
         .append(", opaque=") //
         .append(opaque) //
-        .append(", flag(B)=") //
+        .append(", flag=") //
         .append(Integer.toBinaryString(flag)) //
         .append(", remark=") //
         .append(remark) //

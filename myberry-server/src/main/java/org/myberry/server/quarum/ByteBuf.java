@@ -1,7 +1,7 @@
 /*
-* MIT License
-*
-* Copyright (c) 2020 gaoyang
+ * MIT License
+ *
+ * Copyright (c) 2020 gaoyang
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -63,18 +63,18 @@ public class ByteBuf {
 
   private int version = 0;
   private String clusterName;
-  private int runningMode;
+  private int produceMode;
   private int fileSize;
   private int connId;
 
   private transient Message data;
 
   public static ByteBuf create(
-      int version, String clusterName, int runningMode, int fileSize, int connId, Message data) {
+      int version, String clusterName, int produceMode, int fileSize, int connId, Message data) {
     ByteBuf byteBuf = new ByteBuf();
     byteBuf.setVersion(version);
     byteBuf.setClusterName(clusterName);
-    byteBuf.setRunningMode(runningMode);
+    byteBuf.setProduceMode(produceMode);
     byteBuf.setFileSize(fileSize);
     byteBuf.setConnId(connId);
     byteBuf.setData(data);
@@ -119,8 +119,8 @@ public class ByteBuf {
       bodyBuffer.get(clusterNameContent);
       byteBuf.setClusterName(new String(clusterNameContent, CHARSET_UTF8));
     }
-    // int runningMode
-    byteBuf.setRunningMode(bodyBuffer.getInt());
+    // int produceMode
+    byteBuf.setProduceMode(bodyBuffer.getInt());
     // int fileSize
     byteBuf.setFileSize(bodyBuffer.getInt());
     // int connId
@@ -181,8 +181,8 @@ public class ByteBuf {
     } else {
       bodyBuffer.putInt(0);
     }
-    // int runningMode
-    bodyBuffer.putInt(this.getRunningMode());
+    // int produceMode
+    bodyBuffer.putInt(this.getProduceMode());
     // int fileSize
     bodyBuffer.putInt(this.getFileSize());
     // int connId
@@ -213,12 +213,12 @@ public class ByteBuf {
     this.clusterName = clusterName;
   }
 
-  public int getRunningMode() {
-    return runningMode;
+  public int getProduceMode() {
+    return produceMode;
   }
 
-  public void setRunningMode(int runningMode) {
-    this.runningMode = runningMode;
+  public void setProduceMode(int produceMode) {
+    this.produceMode = produceMode;
   }
 
   public int getFileSize() {
@@ -254,8 +254,8 @@ public class ByteBuf {
         .append(", clusterName='")
         .append(clusterName)
         .append('\'')
-        .append(", runningMode=")
-        .append(runningMode)
+        .append(", produceMode=")
+        .append(produceMode)
         .append(", fileSize=")
         .append(fileSize)
         .append(", connId=")
