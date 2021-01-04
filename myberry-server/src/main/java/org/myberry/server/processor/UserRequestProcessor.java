@@ -26,7 +26,7 @@ package org.myberry.server.processor;
 import io.netty.channel.ChannelHandlerContext;
 import org.myberry.common.ProduceMode;
 import org.myberry.common.codec.LightCodec;
-import org.myberry.common.codec.Maps;
+import org.myberry.common.codec.util.Maps;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.protocol.ResponseCode;
 import org.myberry.common.protocol.body.user.CRPullResultData;

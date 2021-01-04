@@ -26,6 +26,7 @@ package org.myberry.common.codec;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
+import org.myberry.common.codec.util.Maps;
 
 public class MapTest {
 

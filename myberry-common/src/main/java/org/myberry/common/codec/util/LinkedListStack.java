@@ -21,9 +21,44 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common;
+package org.myberry.common.codec.util;
 
-public interface Component {
+import java.util.EmptyStackException;
 
-  byte[] encode();
+public class LinkedListStack<E> {
+
+  private static class Node<E> {
+    E item;
+    Node next;
+  }
+
+  private Node<E> top = null;
+
+  public boolean imEmpty() {
+    return top == null;
+  }
+
+  public E peek() {
+    if (top == null) {
+      throw new EmptyStackException();
+    }
+    return top.item;
+  }
+
+  public void push(E item) {
+    Node node = new Node();
+    node.item = item;
+    node.next = top;
+    top = node;
+  }
+
+  public E pop() {
+    if (top == null) {
+      return null;
+    }
+
+    E obj = top.item;
+    top = top.next;
+    return obj;
+  }
 }

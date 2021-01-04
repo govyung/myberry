@@ -35,7 +35,7 @@ import org.myberry.client.user.PullResult;
 import org.myberry.client.user.PullStatus;
 import org.myberry.common.ProduceMode;
 import org.myberry.common.codec.LightCodec;
-import org.myberry.common.codec.Maps;
+import org.myberry.common.codec.util.Maps;
 import org.myberry.common.monitor.MonitorCode;
 import org.myberry.common.protocol.RequestCode;
 import org.myberry.common.protocol.ResponseCode;

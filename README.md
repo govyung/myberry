@@ -32,7 +32,7 @@ Only supports Java 1.8
 <dependency>
 	<groupId>org.myberry</groupId>
 	<artifactId>myberry-client</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 </dependency>
 ```
 

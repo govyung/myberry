@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.util;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Maps {
+public final class Maps {
 
   private static final Charset UTF_8 = Charset.forName("UTF-8");
 

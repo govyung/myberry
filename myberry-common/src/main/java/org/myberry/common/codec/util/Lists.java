@@ -21,44 +21,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.util;
 
-import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import sun.misc.Unsafe;
+import java.util.ArrayList;
+import java.util.List;
 
-class RegistryTable<K, V> extends LinkedHashMap<K, V> {
+public class Lists {
 
-  private static final sun.misc.Unsafe UNSAFE;
-  private static final long valueOffset;
-  transient volatile int maxCapacity = 0;
-
-  static {
-    try {
-      Field field = Unsafe.class.getDeclaredField("theUnsafe");
-      field.setAccessible(true);
-      UNSAFE = (Unsafe) field.get(null);
-
-      valueOffset = UNSAFE.objectFieldOffset(RegistryTable.class.getDeclaredField("maxCapacity"));
-    } catch (Exception ex) {
-      throw new Error(ex);
-    }
+  public static List newArrayList() {
+    return newArrayList(0);
   }
 
-  public RegistryTable() {
-    super(16, 0.75f, true);
-  }
-
-  @Override
-  protected boolean removeEldestEntry(java.util.Map.Entry<K, V> eldest) {
-    return size() > maxCapacity;
-  }
-
-  public boolean setMaxCapacity(int maxCapacity) {
-    if (UNSAFE.compareAndSwapInt(this, valueOffset, 0, maxCapacity)) {
-      return true;
-    } else {
-      return false;
-    }
+  public static List newArrayList(int capacity) {
+    return new ArrayList(capacity);
   }
 }

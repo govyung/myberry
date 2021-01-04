@@ -26,9 +26,10 @@ package org.myberry.common.protocol.body.admin;
 import java.lang.reflect.Field;
 import org.myberry.common.Component;
 import org.myberry.common.codec.LightCodec;
+import org.myberry.common.codec.MessageLite;
 import org.myberry.common.codec.annotation.SerialField;
 
-public class CRComponentData implements Component {
+public class CRComponentData implements MessageLite, Component {
 
   public static final int CODE = 1;
 

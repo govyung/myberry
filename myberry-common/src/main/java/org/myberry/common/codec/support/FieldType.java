@@ -21,28 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-enum FieldType {
+public enum FieldType {
   INT(0, Collection.SCALAR, BasicType.INT),
   LONG(1, Collection.SCALAR, BasicType.LONG),
   FLOAT(2, Collection.SCALAR, BasicType.FLOAT),
   DOUBLE(3, Collection.SCALAR, BasicType.DOUBLE),
   BOOLEAN(4, Collection.SCALAR, BasicType.BOOLEAN),
   STRING(5, Collection.SCALAR, BasicType.STRING),
-  MESSAGE(6, Collection.SCALAR, BasicType.MESSAGE),
+  MESSAGELITE(6, Collection.SCALAR, BasicType.MESSAGELITE),
   INT_LIST(7, Collection.VECTOR, BasicType.INT),
   LONG_LIST(8, Collection.VECTOR, BasicType.LONG),
   FLOAT_LIST(9, Collection.VECTOR, BasicType.FLOAT),
   DOUBLE_LIST(10, Collection.VECTOR, BasicType.DOUBLE),
   BOOLEAN_LIST(11, Collection.VECTOR, BasicType.BOOLEAN),
   STRING_LIST(12, Collection.VECTOR, BasicType.STRING),
-  MESSAGE_LIST(13, Collection.VECTOR, BasicType.MESSAGE);
+  MESSAGELITE_LIST(13, Collection.VECTOR, BasicType.MESSAGELITE);
 
   private final BasicType basicType;
   private final int id;
@@ -69,8 +69,16 @@ enum FieldType {
     return id;
   }
 
-  public boolean isScalar() {
-    return collection == Collection.SCALAR;
+  public Class<?> getType() {
+    return basicType.getType();
+  }
+
+  public Class<?> getBoxedType() {
+    return basicType.getBoxedType();
+  }
+
+  public boolean isDifferentBetweenTypeAndBoxedType() {
+    return basicType.isDifferent();
   }
 
   public boolean isList() {

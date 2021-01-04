@@ -21,9 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common;
+package org.myberry.common.codec.asm.deserializer;
 
-public interface Component {
+public interface MessageLiteDeserializer {
 
-  byte[] encode();
+  Object createInstance();
+
+  Object readMessageLite(Object messageLite, int serialNo, Object fieldValue)
+      throws RuntimeException;
 }

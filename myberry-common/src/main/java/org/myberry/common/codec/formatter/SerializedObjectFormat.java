@@ -21,11 +21,11 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.formatter;
 
 import java.util.List;
 
-final class SerializedObjectFormat {
+public final class SerializedObjectFormat {
 
   private static final int FIXED32_SIZE = 4;
   private static final int FIXED64_SIZE = 8;
@@ -71,7 +71,7 @@ final class SerializedObjectFormat {
     return 4 + InOutStream.write(fieldValue).length;
   }
 
-  public static int getMessageCodeLength() {
+  public static int getMessageLiteLength() {
     return FIXED32_SIZE;
   }
 
@@ -145,7 +145,7 @@ final class SerializedObjectFormat {
    * @param listSize
    * @return
    */
-  public static int getMessageListLength(int messageListLength) {
-    return 4 + messageListLength;
+  public static int getMessageLiteListLength(int messageLiteListLength) {
+    return 4 + messageLiteListLength;
   }
 }

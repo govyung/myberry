@@ -21,9 +21,34 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common;
+package org.myberry.common.codec.asm;
 
-public interface Component {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.myberry.common.codec.asm.deserializer.MessageLiteDeserializer;
 
-  byte[] encode();
+public class ASMDeserializerAdpter {
+
+  private static final ConcurrentMap<String /*ClassName*/, Map<Integer /*serialNo*/, Class>>
+      serialNoMap = new ConcurrentHashMap<>();
+
+  private static final ASMDeserializerAdpter asmDeserializerAdpter = new ASMDeserializerAdpter();
+  private final ASMDeserializerFactory asmDeserializerFactory;
+
+  private ASMDeserializerAdpter() {
+    this.asmDeserializerFactory = new ASMDeserializerFactory(serialNoMap);
+  }
+
+  public static ASMDeserializerAdpter getInstance() {
+    return asmDeserializerAdpter;
+  }
+
+  public MessageLiteDeserializer readTo(Class<?> clazz) throws Exception {
+    return asmDeserializerFactory.getDeserializer(clazz);
+  }
+
+  public Class getClassByFieldSerialNo(String clazzName, int serialNo) {
+    return serialNoMap.get(clazzName).get(serialNo);
+  }
 }

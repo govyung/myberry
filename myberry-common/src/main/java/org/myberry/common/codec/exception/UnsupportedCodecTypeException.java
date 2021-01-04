@@ -23,7 +23,7 @@
  */
 package org.myberry.common.codec.exception;
 
-public class UnsupportedCodecTypeException extends Exception {
+public class UnsupportedCodecTypeException extends RuntimeException {
 
   private static final long serialVersionUID = -8133985603417487884L;
 

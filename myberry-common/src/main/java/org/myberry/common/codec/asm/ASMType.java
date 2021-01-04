@@ -21,18 +21,35 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.asm;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ASMType {
 
-class Lists {
+  private String name;
+  private String simpleName;
+  private String nameType;
 
-  public static List newArrayList() {
-    return newArrayList(0);
+  public String getName() {
+    return name;
   }
 
-  public static List newArrayList(int capacity) {
-    return new ArrayList(capacity);
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getSimpleName() {
+    return simpleName;
+  }
+
+  public void setSimpleName(String simpleName) {
+    this.simpleName = simpleName;
+  }
+
+  public String getNameType() {
+    return nameType;
+  }
+
+  public void setNameType(String nameType) {
+    this.nameType = nameType;
   }
 }

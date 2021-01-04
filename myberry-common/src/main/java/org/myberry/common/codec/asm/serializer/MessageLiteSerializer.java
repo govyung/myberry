@@ -21,34 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.asm.serializer;
 
-enum BasicType {
-  INT(int.class, Integer.class),
-  LONG(long.class, Long.class),
-  FLOAT(float.class, Float.class),
-  DOUBLE(double.class, Double.class),
-  BOOLEAN(boolean.class, Boolean.class),
-  STRING(String.class, String.class),
-  MESSAGE(MessageLite.class, MessageLite.class);
+import org.myberry.common.codec.MessageLite;
+import org.myberry.common.codec.formatter.InOutStream;
 
-  private final Class<?> type;
-  private final Class<?> boxedType;
+public interface MessageLiteSerializer {
 
-  BasicType(Class<?> type, Class<?> boxedType) {
-    this.type = type;
-    this.boxedType = boxedType;
-  }
-
-  public Class<?> getType() {
-    return type;
-  }
-
-  public Class<?> getBoxedType() {
-    return boxedType;
-  }
-
-  public boolean isValidType(Class<?> t) {
-    return type.isAssignableFrom(t) || boxedType.isAssignableFrom(t);
-  }
+  void writeMessageLite(MessageLite messageLite, InOutStream inOutStream) throws Exception;
 }

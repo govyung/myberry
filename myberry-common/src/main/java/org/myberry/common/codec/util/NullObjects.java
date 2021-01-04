@@ -21,48 +21,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.codec;
+package org.myberry.common.codec.util;
 
 import java.util.List;
 
-class NullObjects {
+public final class NullObjects {
 
-  static final int NULL_INT_DEFAULT = 0;
-  static final long NULL_LONG_DEFAULT = 0L;
-  static final float NULL_FLOAT_DEFAULT = 0F;
-  static final double NULL_DOUBLE_DEFAULT = 0D;
-  static final boolean NULL_BOOLEAN_DEFAULT = false;
-  static final String NULL_STRING_DEFAULT = "";
-
-  static final int NULL_MESSAGE = 0;
-  static final int NOT_NULL_MESSAGE = 1;
+  public static final int NULL_INT_DEFAULT = 0;
+  public static final long NULL_LONG_DEFAULT = 0L;
+  public static final float NULL_FLOAT_DEFAULT = 0F;
+  public static final double NULL_DOUBLE_DEFAULT = 0D;
+  public static final boolean NULL_BOOLEAN_DEFAULT = false;
+  public static final String NULL_STRING_DEFAULT = "";
 
   public static int getDefaultIntIfAbsent(Integer current) {
-    return current == null ? NULL_INT_DEFAULT : current;
+    return current == null ? NULL_INT_DEFAULT : current.intValue();
   }
 
   public static long getDefaultLongIfAbsent(Long current) {
-    return current == null ? NULL_LONG_DEFAULT : current;
+    return current == null ? NULL_LONG_DEFAULT : current.longValue();
   }
 
   public static float getDefaultFloatIfAbsent(Float current) {
-    return current == null ? NULL_FLOAT_DEFAULT : current;
+    return current == null ? NULL_FLOAT_DEFAULT : current.floatValue();
   }
 
   public static double getDefaultDoubleIfAbsent(Double current) {
-    return current == null ? NULL_DOUBLE_DEFAULT : current;
+    return current == null ? NULL_DOUBLE_DEFAULT : current.doubleValue();
   }
 
   public static boolean getDefaultBooleanIfAbsent(Boolean current) {
-    return current == null ? NULL_BOOLEAN_DEFAULT : current;
+    return current == null ? NULL_BOOLEAN_DEFAULT : current.booleanValue();
   }
 
   public static String getDefaultStringIfAbsent(String current) {
     return current == null ? NULL_STRING_DEFAULT : current;
-  }
-
-  public static int getDefaultMessageLengthCodeIfAbsent(MessageLite current) {
-    return current == null ? NULL_MESSAGE : NOT_NULL_MESSAGE;
   }
 
   public static <T> List<T> getDefaultListIfAbsent(List<T> current) {

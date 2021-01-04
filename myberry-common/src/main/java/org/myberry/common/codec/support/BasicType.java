@@ -21,9 +21,42 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common;
+package org.myberry.common.codec.support;
 
-public interface Component {
+import org.myberry.common.codec.MessageLite;
 
-  byte[] encode();
+enum BasicType {
+  INT(int.class, Integer.class, true),
+  LONG(long.class, Long.class, true),
+  FLOAT(float.class, Float.class, true),
+  DOUBLE(double.class, Double.class, true),
+  BOOLEAN(boolean.class, Boolean.class, true),
+  STRING(String.class, String.class, false),
+  MESSAGELITE(MessageLite.class, MessageLite.class, false);
+
+  private final Class<?> type;
+  private final Class<?> boxedType;
+  private final boolean different;
+
+  BasicType(Class<?> type, Class<?> boxedType, boolean different) {
+    this.type = type;
+    this.boxedType = boxedType;
+    this.different = different;
+  }
+
+  public Class<?> getType() {
+    return type;
+  }
+
+  public Class<?> getBoxedType() {
+    return boxedType;
+  }
+
+  public boolean isDifferent() {
+    return different;
+  }
+
+  public boolean isValidType(Class<?> t) {
+    return type.isAssignableFrom(t) || boxedType.isAssignableFrom(t);
+  }
 }
