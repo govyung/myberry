@@ -29,8 +29,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.FieldVisitor;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
@@ -48,8 +46,8 @@ public class ASMSerializerFactory implements Opcodes {
 
   private static final ASMClassLoader amsClassLoader = new ASMClassLoader();
 
-  private static final ConcurrentMap<String /*ClassName*/, MessageLiteSerializer>
-      messageLiteSerializerMap = new ConcurrentHashMap<>();
+  private static final Map<String /*ClassName*/, MessageLiteSerializer> messageLiteSerializerMap =
+      new HashMap<>();
 
   private static final String ASM_CLASS_SERIALIZER_PRE = "ASMSerializer";
   private static final String ASM_DEFAULT_CONSTRUCTOR_NAME = "<init>";
@@ -100,14 +98,20 @@ public class ASMSerializerFactory implements Opcodes {
   }
 
   public MessageLiteSerializer getSerializer(Class<? extends MessageLite> clazz) throws Exception {
-
     MessageLiteSerializer messageLiteSerializer = messageLiteSerializerMap.get(clazz.getName());
     if (messageLiteSerializer != null) {
       return messageLiteSerializer;
     }
 
-    messageLiteSerializer = factoryASMSerializer(clazz);
-    messageLiteSerializerMap.putIfAbsent(clazz.getName(), messageLiteSerializer);
+    synchronized (messageLiteSerializerMap) {
+      messageLiteSerializer = messageLiteSerializerMap.get(clazz.getName());
+      if (messageLiteSerializer != null) {
+        return messageLiteSerializer;
+      }
+
+      messageLiteSerializer = factoryASMSerializer(clazz);
+      messageLiteSerializerMap.put(clazz.getName(), messageLiteSerializer);
+    }
     return messageLiteSerializer;
   }
 

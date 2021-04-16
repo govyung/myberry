@@ -21,12 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.client.router.loadbalance;
+package org.myberry.client.exception;
 
-import java.util.List;
-import org.myberry.common.loadbalance.Invoker;
+public class MyberryRuntimeException extends RuntimeException {
 
-public interface LoadBalance {
+  private static final long serialVersionUID = -8750356101836217184L;
 
-  Invoker doSelect(List<Invoker> invokers, String key);
+  private int responseCode;
+  private String errorMessage;
+
+  public MyberryRuntimeException(String errorMessage) {
+    super(errorMessage);
+  }
+
+  public MyberryRuntimeException(String errorMessage, Throwable cause) {
+    super(errorMessage, cause);
+  }
+
+  public int getResponseCode() {
+    return responseCode;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
 }

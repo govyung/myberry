@@ -35,21 +35,21 @@ public interface AdminClient {
   SendResult createComponent(Component component, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  void createComponent(Component component, SendCallback sendCallback)
+  SendResult queryComponentSize()
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  void createComponent(Component component, long timeout, SendCallback sendCallback)
+  SendResult queryComponentSize(long timeout)
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  SendResult queryAllComponent(int pageNo, int pageSize)
+  SendResult queryComponentByKey(String key)
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  SendResult queryAllComponent(int pageNo, int pageSize, long timeout)
+  SendResult queryComponentByKey(String key, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  void queryAllComponent(int pageNo, int pageSize, SendCallback sendCallback)
+  SendResult queryClusterList()
       throws RemotingException, InterruptedException, MyberryServerException;
 
-  void queryAllComponent(int pageNo, int pageSize, long timeout, SendCallback sendCallback)
+  SendResult queryClusterList(long timeout)
       throws RemotingException, InterruptedException, MyberryServerException;
 }

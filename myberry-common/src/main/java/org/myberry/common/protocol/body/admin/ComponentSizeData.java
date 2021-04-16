@@ -21,34 +21,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.client.router.loadbalance;
+package org.myberry.common.protocol.body.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
-import org.myberry.common.loadbalance.Invoker;
+import org.myberry.common.codec.MessageLite;
+import org.myberry.common.codec.annotation.SerialField;
 
-public class RandomLoadBalanceTest {
+public class ComponentSizeData implements MessageLite {
 
-  @Test
-  public void testRandomLoadBalanceTest() {
-    Invoker invoker1 = new Invoker("192.168.1.1:8080", 4);
-    Invoker invoker2 = new Invoker("192.168.1.2:8080", 7);
-    Invoker invoker3 = new Invoker("192.168.1.3:8080", 11);
-    List<Invoker> addrs = new ArrayList<>();
-    addrs.add(invoker1);
-    addrs.add(invoker2);
-    addrs.add(invoker3);
+  @SerialField(ordinal = 0)
+  private int size;
 
-    LoadBalance lb = new RandomLoadBalance();
+  public int getSize() {
+    return size;
+  }
 
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
-    Assert.assertNotNull(lb.doSelect(addrs, "key1"));
+  public void setSize(int size) {
+    this.size = size;
   }
 }

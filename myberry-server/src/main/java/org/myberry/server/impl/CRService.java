@@ -23,11 +23,8 @@
 */
 package org.myberry.server.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,82 +72,6 @@ public class CRService extends MyberryService {
   }
 
   @Override
-  public AdminManageResult addComponent(Object... obj) {
-    lock.lock();
-    try {
-      long currentTime = new Date().getTime();
-
-      CRComponent crc = new CRComponent();
-      crc.setCreateTime(currentTime);
-      crc.setUpdateTime(currentTime);
-      crc.setPhyOffset(myberryStore.getLastOffset());
-      crc.setStatus(ComponentStatus.OPEN.getStatus());
-
-      for (int i = 0; i < obj.length; i++) {
-        String str = (String) obj[i];
-        int length = str.getBytes(StoreConfig.MYBERRY_STORE_DEFAULT_CHARSET).length;
-        if (i == 0) {
-          crc.setKeyLength(length);
-          crc.setKey(str);
-        } else if (i == 1) {
-          crc.setExpressionLength(length);
-          crc.setExpression(str);
-        }
-      }
-
-      if (myberryStore.isWriteFull(
-          CRComponent.FIXED_FIELD_SIZE + crc.getKeyLength() + crc.getExpressionLength())) {
-        return new AdminManageResult(ResponseCode.DISK_FULL);
-      } else if (myberryStore.isExistKey(crc.getKey())) {
-        return new AdminManageResult(ResponseCode.KEY_EXISTED);
-      }
-      myberryStore.addComponent(crc);
-
-      BufferStructObject bufferStructObject =
-          expressionConverterFactory.doConvert(ExpressionParser.split(crc.getExpression()));
-      bufferStructObject.setSid(myberryStore.getMySidFromDisk());
-      buffertMap.put(crc.getKey(), bufferStructObject);
-
-      log.info(
-          "{} ++> add key: {}, expression: {} success.",
-          this.getServiceName(),
-          crc.getKey(),
-          crc.getExpression());
-      return new AdminManageResult(ResponseCode.SUCCESS);
-    } catch (Exception e) {
-      log.error("error request: ", e);
-      return new AdminManageResult(ResponseCode.SYSTEM_ERROR);
-    } finally {
-      lock.unlock();
-    }
-  }
-
-  @Override
-  public Object queryComponentList(int pageNo, int pageSize) {
-    Collection<AbstractComponent> componentList = myberryStore.queryAllComponent();
-
-    List<CRComponentData> component = new ArrayList<>();
-
-    pageNo = pageNo < 1 ? 1 : pageNo;
-    pageSize = pageSize < 0 ? 0 : pageSize;
-
-    int start = (pageNo - 1) * pageSize;
-    int end = start + pageSize;
-    end = end < componentList.size() ? end : componentList.size();
-
-    for (int i = start; i < end; i++) {
-      CRComponent crc = (CRComponent) componentList.toArray()[i];
-      CRComponentData crcd = new CRComponentData();
-      crcd.setKey(crc.getKey());
-      crcd.setExpression(crc.getExpression());
-      crcd.setCode(CRComponentData.CODE);
-      component.add(crcd);
-    }
-
-    return component;
-  }
-
-  @Override
   public PullIdResult getNewId(String key, Map<String, String> attachments) {
     if (!myberryStore.isExistKey(key)) {
       log.warn("invalid key: {}", key);
@@ -195,6 +116,74 @@ public class CRService extends MyberryService {
     } finally {
       crc.getLock().unlock();
     }
+  }
+
+  @Override
+  public AdminManageResult addComponent(Object... obj) {
+    lock.lock();
+    try {
+      long currentTime = new Date().getTime();
+
+      CRComponent crc = new CRComponent();
+      crc.setCreateTime(currentTime);
+      crc.setUpdateTime(currentTime);
+      crc.setPhyOffset(myberryStore.getLastOffset());
+      crc.setStatus(ComponentStatus.OPEN.getStatus());
+
+      for (int i = 0; i < obj.length; i++) {
+        String str = (String) obj[i];
+        int length = str.getBytes(StoreConfig.MYBERRY_STORE_DEFAULT_CHARSET).length;
+        if (i == 0) {
+          crc.setKeyLength(length);
+          crc.setKey(str);
+        } else if (i == 1) {
+          crc.setExpressionLength(length);
+          crc.setExpression(str);
+        }
+      }
+
+      String[] exp = ExpressionParser.split(crc.getExpression().trim());
+
+      if (myberryStore.isWriteFull(
+          CRComponent.FIXED_FIELD_SIZE + crc.getKeyLength() + crc.getExpressionLength())) {
+        return new AdminManageResult(ResponseCode.DISK_FULL);
+      } else if (myberryStore.isExistKey(crc.getKey())) {
+        return new AdminManageResult(ResponseCode.KEY_EXISTED);
+      }
+      myberryStore.addComponent(crc);
+
+      BufferStructObject bufferStructObject = expressionConverterFactory.doConvert(exp);
+      bufferStructObject.setSid(myberryStore.getMySidFromDisk());
+      buffertMap.put(crc.getKey(), bufferStructObject);
+
+      log.info(
+          "{} ++> add key: {}, expression: {} success.",
+          this.getServiceName(),
+          crc.getKey(),
+          crc.getExpression());
+      return new AdminManageResult(ResponseCode.SUCCESS);
+    } catch (Exception e) {
+      log.error("error request: ", e);
+      return new AdminManageResult(ResponseCode.SYSTEM_ERROR);
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
+  public AdminManageResult queryComponentByKey(String key) {
+    if (!myberryStore.isExistKey(key)) {
+      log.warn("invalid key: {}", key);
+      return new AdminManageResult(ResponseCode.KEY_NOT_EXISTED);
+    }
+
+    CRComponent crc = (CRComponent) myberryStore.getComponentMap().get(key);
+
+    CRComponentData crcd = new CRComponentData();
+    crcd.setKey(key);
+    crcd.setExpression(crc.getExpression());
+    crcd.setCode(CRComponentData.CODE);
+    return new AdminManageResult(ResponseCode.SUCCESS, crcd);
   }
 
   @Override

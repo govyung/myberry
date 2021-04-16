@@ -41,12 +41,12 @@ public class RoundRobinLoadBalanceTest {
     addrs.add(invoker2);
     addrs.add(invoker3);
 
-    LoadBalance lb = new RoundRobinLoadBalance();
-    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs, "key1").getAddr());
-    Assert.assertEquals("192.168.1.2:8080", lb.doSelect(addrs, "key1").getAddr());
-    Assert.assertEquals("192.168.1.1:8080", lb.doSelect(addrs, "key1").getAddr());
-    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs, "key1").getAddr());
-    Assert.assertEquals("192.168.1.2:8080", lb.doSelect(addrs, "key1").getAddr());
-    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs, "key1").getAddr());
+    RoundRobinLoadBalance lb = new RoundRobinLoadBalance();
+    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs).getAddr());
+    Assert.assertEquals("192.168.1.2:8080", lb.doSelect(addrs).getAddr());
+    Assert.assertEquals("192.168.1.1:8080", lb.doSelect(addrs).getAddr());
+    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs).getAddr());
+    Assert.assertEquals("192.168.1.2:8080", lb.doSelect(addrs).getAddr());
+    Assert.assertEquals("192.168.1.3:8080", lb.doSelect(addrs).getAddr());
   }
 }

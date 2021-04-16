@@ -25,6 +25,7 @@ package org.myberry.client.admin;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -32,6 +33,8 @@ import org.junit.Test;
 import org.myberry.client.exception.MyberryClientException;
 import org.myberry.client.exception.MyberryServerException;
 import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.ClusterListData;
+import org.myberry.common.protocol.body.admin.ClusterListData.ClusterNode;
 import org.myberry.common.protocol.body.admin.NSComponentData;
 import org.myberry.common.strategy.StrategyDate;
 import org.myberry.remoting.exception.RemotingException;
@@ -45,12 +48,12 @@ public class AdminClientTest {
   public static void setup() throws MyberryClientException {
     defaultAdminClient = new DefaultAdminClient();
     defaultAdminClient.setPassword("foobared");
-    defaultAdminClient.setServerAddr("192.168.1.3:8085,192.168.1.3:8086,192.168.1.3:8087");
+    defaultAdminClient.setServerAddr("192.168.1.2:8085,192.168.1.2:8086,192.168.1.2:8087");
     defaultAdminClient.start();
   }
 
   @Test
-  public void createComponent1()
+  public void createComponentForCR()
       throws RemotingException, InterruptedException, MyberryServerException {
     CRComponentData cr = new CRComponentData();
     cr.setKey("key1");
@@ -58,12 +61,11 @@ public class AdminClientTest {
         "[#time(day) 9 #sid(2) #sid(1) #sid(0) m #incr(4) #incr(3) #incr(2) #incr(1) #incr(0) $dynamic(hello) #rand(3)]");
 
     SendResult sendResult = defaultAdminClient.createComponent(cr);
-    System.out.println(sendResult);
     assertEquals(SendStatus.SEND_OK, sendResult.getSendStatus());
   }
 
   @Test
-  public void createComponent2()
+  public void createComponentForNS()
       throws RemotingException, InterruptedException, MyberryServerException {
     NSComponentData ns = new NSComponentData();
     ns.setKey("key2");
@@ -72,14 +74,43 @@ public class AdminClientTest {
     ns.setResetType(StrategyDate.TIME_DAY);
 
     SendResult sendResult = defaultAdminClient.createComponent(ns);
-    System.out.println(sendResult);
+    assertEquals(SendStatus.SEND_OK, sendResult.getSendStatus());
   }
 
   @Test
-  public void queryAllComponent()
+  public void queryComponentSize()
       throws RemotingException, InterruptedException, MyberryServerException {
-    SendResult sendResult = defaultAdminClient.queryAllComponent(0, 10);
-    System.out.println(sendResult);
+    SendResult sendResult = defaultAdminClient.queryComponentSize();
+    assertEquals(1, sendResult.getSize().intValue());
+  }
+
+  @Test
+  public void queryComponentByKeyForCR()
+      throws RemotingException, InterruptedException, MyberryServerException {
+    SendResult sendResult = defaultAdminClient.queryComponentByKey("key1");
+    CRComponentData crcd = (CRComponentData) sendResult.getComponent();
+    assertEquals(
+        "[#time(day) 9 #sid(2) #sid(1) #sid(0) m #incr(4) #incr(3) #incr(2) #incr(1) #incr(0) $dynamic(hello) #rand(3)]",
+        crcd.getExpression());
+  }
+
+  @Test
+  public void queryComponentByKeyForNS()
+      throws RemotingException, InterruptedException, MyberryServerException {
+    SendResult sendResult = defaultAdminClient.queryComponentByKey("key2");
+    NSComponentData nscd = (NSComponentData) sendResult.getComponent();
+    assertEquals(100, nscd.getValue());
+    assertEquals(5, nscd.getStepSize());
+    assertEquals(StrategyDate.TIME_DAY, nscd.getResetType());
+  }
+
+  @Test
+  public void queryClusterList()
+      throws RemotingException, InterruptedException, MyberryServerException {
+    SendResult sendResult = defaultAdminClient.queryClusterList();
+    ClusterListData clusterList = sendResult.getClusterList();
+    List<ClusterNode> clusters = clusterList.getClusters();
+    assertEquals(3, clusters.size());
   }
 
   @AfterClass

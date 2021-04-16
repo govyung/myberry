@@ -24,7 +24,6 @@
 package org.myberry.common;
 
 import org.myberry.common.annotation.ImportantField;
-import org.myberry.common.loadbalance.LoadBalanceName;
 
 public class ServerConfig {
 
@@ -38,7 +37,6 @@ public class ServerConfig {
   private String haServerAddr =
       System.getProperty(MixAll.MYBERRY_ADDR_PROPERTY, System.getenv(MixAll.MYBERRY_ADDR_ENV));
 
-  private String loadbalance = LoadBalanceName.ROUNDROBIN_LOADBALANCE;
   private int weight = 1;
 
   private String password = "foobared";
@@ -71,14 +69,6 @@ public class ServerConfig {
 
   public void setHaServerAddr(String haServerAddr) {
     this.haServerAddr = haServerAddr;
-  }
-
-  public String getLoadbalance() {
-    return loadbalance;
-  }
-
-  public void setLoadbalance(String loadbalance) {
-    this.loadbalance = loadbalance;
   }
 
   public int getWeight() {

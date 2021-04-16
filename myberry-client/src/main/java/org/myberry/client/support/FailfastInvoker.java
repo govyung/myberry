@@ -32,7 +32,8 @@ import org.myberry.client.exception.MyberryServerException;
 import org.myberry.client.impl.CommunicationMode;
 import org.myberry.client.impl.user.DefaultUserClientImpl;
 import org.myberry.client.router.DefaultRouter;
-import org.myberry.client.router.loadbalance.LoadBalance;
+import org.myberry.client.router.loadbalance.ConsistentHashLoadBalance;
+import org.myberry.client.router.loadbalance.RoundRobinLoadBalance;
 import org.myberry.client.user.PullCallback;
 import org.myberry.client.user.PullResult;
 import org.myberry.common.loadbalance.Invoker;
@@ -58,32 +59,28 @@ public class FailfastInvoker extends AbstractInvoker {
   @Override
   public PullResult doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments,
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode //
       ) throws RemotingException, InterruptedException, MyberryServerException {
     DefaultRouter defaultRouter = defaultUserClientImpl.getDefaultUserClient().getDefaultRouter();
-    LoadBalance loadBalance = defaultRouter.getLoadBalance();
     List<Invoker> invokers = defaultRouter.getInvokers();
-    String addr =
-        defaultRouter
-            .getInvoker(loadBalance, invokers, ((PullIdBackRequestHeader) requstHeader).getKey())
-            .getAddr();
+    String addr = defaultRouter.getInvoker(invokers).getAddr();
     try {
       return defaultUserClientImpl
           .getMyberryClientFactory()
           .getMyberryClientAPIImpl()
-          .pull(addr, requstHeader, attachments, timeoutMillis, communicationMode);
+          .pull(addr, requestHeader, attachments, timeoutMillis, communicationMode);
     } catch (RemotingException e) {
       throw new RemotingException(
           String.format(
               "failfast invoke server %s %s select from all invokers %s for request key %s on communicationMode %s, and last error is: %s",
               addr,
-              (loadBalance == null ? null : loadBalance.getClass().getSimpleName()),
+              RoundRobinLoadBalance.class.getSimpleName(),
               invokers,
-              ((PullIdBackRequestHeader) requstHeader).getKey(),
+              ((PullIdBackRequestHeader) requestHeader).getKey(),
               communicationMode,
               e.getMessage()));
     } catch (InterruptedException | MyberryServerException e) {
@@ -94,7 +91,7 @@ public class FailfastInvoker extends AbstractInvoker {
   @Override
   public void doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments,
       final long timeoutMillis, //
       final int timesRetry, //
@@ -104,12 +101,8 @@ public class FailfastInvoker extends AbstractInvoker {
     final long beginStartTime = System.currentTimeMillis();
 
     DefaultRouter defaultRouter = defaultUserClientImpl.getDefaultUserClient().getDefaultRouter();
-    final LoadBalance loadBalance = defaultRouter.getLoadBalance();
     final List<Invoker> invokers = defaultRouter.getInvokers();
-    final String addr =
-        defaultRouter
-            .getInvoker(loadBalance, invokers, ((PullIdBackRequestHeader) requstHeader).getKey())
-            .getAddr();
+    final String addr = defaultRouter.getInvoker(invokers).getAddr();
     try {
       this.asyncSenderExecutor.submit(
           new Runnable() {
@@ -123,7 +116,7 @@ public class FailfastInvoker extends AbstractInvoker {
                       .getMyberryClientAPIImpl()
                       .pull(
                           addr,
-                          requstHeader,
+                          requestHeader,
                           attachments,
                           timeoutMillis - costTime,
                           communicationMode,
@@ -134,9 +127,99 @@ public class FailfastInvoker extends AbstractInvoker {
                           String.format(
                               "failfast invoke server %s %s select from all invokers %s for request key %s on communicationMode %s, and last error is: %s",
                               addr,
-                              (loadBalance == null ? null : loadBalance.getClass().getSimpleName()),
+                              RoundRobinLoadBalance.class.getSimpleName(),
                               invokers,
-                              ((PullIdBackRequestHeader) requstHeader).getKey(),
+                              ((PullIdBackRequestHeader) requestHeader).getKey(),
+                              communicationMode,
+                              e.getMessage())));
+                }
+              } else {
+                pullCallback.onException(
+                    new RemotingTooMuchRequestException("DEFAULT ASYNC pull call timeout"));
+              }
+            }
+          });
+    } catch (RejectedExecutionException e) {
+      throw new MyberryClientException("executor rejected ", e);
+    }
+  }
+
+  @Override
+  public PullResult doInvoke(
+      DefaultUserClientImpl defaultUserClientImpl, //
+      CommandCustomHeader requestHeader, //
+      HashMap<String, String> attachments, //
+      String sessionKey, //
+      long timeoutMillis, //
+      int timesRetry, //
+      CommunicationMode communicationMode //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    DefaultRouter defaultRouter = defaultUserClientImpl.getDefaultUserClient().getDefaultRouter();
+    List<Invoker> invokers = defaultRouter.getInvokers();
+    String addr = defaultRouter.getInvoker(invokers, sessionKey).getAddr();
+    try {
+      return defaultUserClientImpl
+          .getMyberryClientFactory()
+          .getMyberryClientAPIImpl()
+          .pull(addr, requestHeader, attachments, timeoutMillis, communicationMode);
+    } catch (RemotingException e) {
+      throw new RemotingException(
+          String.format(
+              "failfast invoke server %s %s select from all invokers %s for request key %s on communicationMode %s, and last error is: %s",
+              addr,
+              ConsistentHashLoadBalance.class.getSimpleName(),
+              invokers,
+              ((PullIdBackRequestHeader) requestHeader).getKey(),
+              communicationMode,
+              e.getMessage()));
+    } catch (InterruptedException | MyberryServerException e) {
+      throw e;
+    }
+  }
+
+  @Override
+  public void doInvoke(
+      DefaultUserClientImpl defaultUserClientImpl, //
+      CommandCustomHeader requestHeader, //
+      HashMap<String, String> attachments, //
+      String sessionKey, //
+      long timeoutMillis, //
+      int timesRetry, //
+      CommunicationMode communicationMode, //
+      PullCallback pullCallback //
+      ) throws MyberryClientException {
+    final long beginStartTime = System.currentTimeMillis();
+
+    DefaultRouter defaultRouter = defaultUserClientImpl.getDefaultUserClient().getDefaultRouter();
+    final List<Invoker> invokers = defaultRouter.getInvokers();
+    final String addr = defaultRouter.getInvoker(invokers, sessionKey).getAddr();
+    try {
+      this.asyncSenderExecutor.submit(
+          new Runnable() {
+            @Override
+            public void run() {
+              long costTime = System.currentTimeMillis() - beginStartTime;
+              if (timeoutMillis > costTime) {
+                try {
+                  defaultUserClientImpl
+                      .getMyberryClientFactory()
+                      .getMyberryClientAPIImpl()
+                      .pull(
+                          addr,
+                          requestHeader,
+                          attachments,
+                          timeoutMillis - costTime,
+                          communicationMode,
+                          pullCallback);
+                } catch (Exception e) {
+                  pullCallback.onException(
+                      new RemotingException(
+                          String.format(
+                              "failfast invoke server %s %s select from all invokers %s for request key %s on communicationMode %s, and last error is: %s",
+                              addr,
+                              ConsistentHashLoadBalance.class.getSimpleName(),
+                              invokers,
+                              ((PullIdBackRequestHeader) requestHeader).getKey(),
                               communicationMode,
                               e.getMessage())));
                 }

@@ -52,7 +52,7 @@ public class DefaultUserInvoker {
   }
 
   public PullResult pull( //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
@@ -63,7 +63,7 @@ public class DefaultUserInvoker {
     return this.autoSelect(timesRetry)
         .doInvoke(
             defaultUserClientImpl,
-            requstHeader,
+            requestHeader,
             attachments,
             timeoutMillis,
             timesRetry,
@@ -71,7 +71,7 @@ public class DefaultUserInvoker {
   }
 
   public PullResult pull( //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
@@ -83,8 +83,53 @@ public class DefaultUserInvoker {
     this.autoSelect(timesRetry)
         .doInvoke(
             defaultUserClientImpl,
-            requstHeader,
+            requestHeader,
             attachments,
+            timeoutMillis,
+            timesRetry,
+            communicationMode,
+            pullCallback);
+    return null;
+  }
+
+  public PullResult pull( //
+      final CommandCustomHeader requestHeader, //
+      final HashMap<String, String> attachments, //
+      final String sessionKey, //
+      final long timeoutMillis, //
+      final int timesRetry, //
+      final CommunicationMode communicationMode //
+      )
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.autoSelect(timesRetry)
+        .doInvoke(
+            defaultUserClientImpl,
+            requestHeader,
+            attachments,
+            sessionKey,
+            timeoutMillis,
+            timesRetry,
+            communicationMode);
+  }
+
+  public PullResult pull( //
+      final CommandCustomHeader requestHeader, //
+      final HashMap<String, String> attachments, //
+      final String sessionKey, //
+      final long timeoutMillis, //
+      final int timesRetry, //
+      final CommunicationMode communicationMode, //
+      final PullCallback pullCallback //
+      )
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.autoSelect(timesRetry)
+        .doInvoke(
+            defaultUserClientImpl,
+            requestHeader,
+            attachments,
+            sessionKey,
             timeoutMillis,
             timesRetry,
             communicationMode,

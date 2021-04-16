@@ -55,24 +55,6 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
         password, produceMode, componentData, CommunicationMode.SYNC, null, timeout);
   }
 
-  public void createComponent(
-      String password, String produceMode, byte[] componentData, SendCallback sendCallback)
-      throws RemotingException, InterruptedException, MyberryServerException {
-    this.createComponent(
-        password, produceMode, componentData, defaultAdminClient.getSendMsgTimeout(), sendCallback);
-  }
-
-  public void createComponent(
-      String password,
-      String produceMode,
-      byte[] componentData,
-      long timeout,
-      SendCallback sendCallback)
-      throws RemotingException, InterruptedException, MyberryServerException {
-    this.createComponentImpl(
-        password, produceMode, componentData, CommunicationMode.ASYNC, sendCallback, timeout);
-  }
-
   private SendResult createComponentImpl( //
       String password, //
       String produceMode, //
@@ -84,10 +66,10 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
     ManageComponentRequestHeader manageComponentRequestHeader =
         this.createAdminRequestHeader(password, produceMode);
 
-    SendResult pullResult = null;
+    SendResult sendResult = null;
     switch (communicationMode) {
       case ASYNC:
-        pullResult =
+        sendResult =
             this.getMyberryClientFactory()
                 .getMyberryClientAPIImpl()
                 .createComponent(
@@ -101,7 +83,7 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
         break;
       case ONEWAY:
       case SYNC:
-        pullResult =
+        sendResult =
             this.getMyberryClientFactory()
                 .getMyberryClientAPIImpl()
                 .createComponent(
@@ -116,33 +98,20 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
         assert false;
         break;
     }
-    return pullResult;
+    return sendResult;
   }
 
-  public SendResult queryAllComponent(byte[] pageData, String password)
+  public SendResult queryComponentSize(String password)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.queryAllComponent(pageData, password, defaultAdminClient.getSendMsgTimeout());
+    return this.queryComponentSize(password, defaultAdminClient.getSendMsgTimeout());
   }
 
-  public SendResult queryAllComponent(byte[] pageData, String password, long timeout)
+  public SendResult queryComponentSize(String password, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.queryAllComponentImpl(pageData, password, CommunicationMode.SYNC, null, timeout);
+    return this.queryComponentSizeImpl(password, CommunicationMode.SYNC, null, timeout);
   }
 
-  public void queryAllComponent(byte[] pageData, String password, SendCallback sendCallback)
-      throws RemotingException, InterruptedException, MyberryServerException {
-    this.queryAllComponent(
-        pageData, password, defaultAdminClient.getSendMsgTimeout(), sendCallback);
-  }
-
-  public void queryAllComponent(
-      byte[] pageData, String password, long timeout, SendCallback sendCallback)
-      throws RemotingException, InterruptedException, MyberryServerException {
-    this.queryAllComponentImpl(pageData, password, CommunicationMode.ASYNC, sendCallback, timeout);
-  }
-
-  private SendResult queryAllComponentImpl( //
-      byte[] pageData, //
+  private SendResult queryComponentSizeImpl(
       String password, //
       final CommunicationMode communicationMode, //
       final SendCallback sendCallback, //
@@ -157,10 +126,9 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
         sendResult =
             this.getMyberryClientFactory()
                 .getMyberryClientAPIImpl()
-                .queryAllComponent(
-                    RequestCode.QUERY_ALL_COMPONENT,
+                .queryComponentSize(
+                    RequestCode.QUERY_COMPONENT_SIZE,
                     defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
-                    pageData,
                     manageComponentRequestHeader,
                     timeout,
                     communicationMode,
@@ -171,10 +139,116 @@ public class DefaultAdminClientImpl extends AbstractClientImpl {
         sendResult =
             this.getMyberryClientFactory()
                 .getMyberryClientAPIImpl()
-                .queryAllComponent(
-                    RequestCode.QUERY_ALL_COMPONENT,
+                .queryComponentSize(
+                    RequestCode.QUERY_COMPONENT_SIZE,
                     defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
-                    pageData,
+                    manageComponentRequestHeader,
+                    timeout,
+                    communicationMode);
+        break;
+      default:
+        assert false;
+        break;
+    }
+    return sendResult;
+  }
+
+  public SendResult queryComponentByKey(byte[] key, String password)
+      throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryComponentByKey(key, password, defaultAdminClient.getSendMsgTimeout());
+  }
+
+  public SendResult queryComponentByKey(byte[] key, String password, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryComponentByKeyImpl(key, password, CommunicationMode.SYNC, null, timeout);
+  }
+
+  public SendResult queryComponentByKeyImpl(
+      byte[] key, //
+      String password, //
+      final CommunicationMode communicationMode, //
+      final SendCallback sendCallback, //
+      final long timeout //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    ManageComponentRequestHeader manageComponentRequestHeader =
+        this.createAdminRequestHeader(password, "");
+
+    SendResult sendResult = null;
+    switch (communicationMode) {
+      case ASYNC:
+        sendResult =
+            this.getMyberryClientFactory()
+                .getMyberryClientAPIImpl()
+                .queryComponentByKey(
+                    RequestCode.QUERY_COMPONENT_BY_KEY,
+                    defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
+                    key,
+                    manageComponentRequestHeader,
+                    timeout,
+                    communicationMode,
+                    sendCallback);
+        break;
+      case ONEWAY:
+      case SYNC:
+        sendResult =
+            this.getMyberryClientFactory()
+                .getMyberryClientAPIImpl()
+                .queryComponentByKey(
+                    RequestCode.QUERY_COMPONENT_BY_KEY,
+                    defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
+                    key,
+                    manageComponentRequestHeader,
+                    timeout,
+                    communicationMode);
+        break;
+      default:
+        assert false;
+        break;
+    }
+    return sendResult;
+  }
+
+  public SendResult queryClusterList(String password)
+      throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryClusterList(password, defaultAdminClient.getSendMsgTimeout());
+  }
+
+  public SendResult queryClusterList(String password, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryClusterListImpl(password, CommunicationMode.SYNC, null, timeout);
+  }
+
+  private SendResult queryClusterListImpl(
+      String password, //
+      final CommunicationMode communicationMode, //
+      final SendCallback sendCallback, //
+      final long timeout //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    ManageComponentRequestHeader manageComponentRequestHeader =
+        this.createAdminRequestHeader(password, "");
+
+    SendResult sendResult = null;
+    switch (communicationMode) {
+      case ASYNC:
+        sendResult =
+            this.getMyberryClientFactory()
+                .getMyberryClientAPIImpl()
+                .queryClusterList(
+                    RequestCode.QUERY_CLUSTER_LIST,
+                    defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
+                    manageComponentRequestHeader,
+                    timeout,
+                    communicationMode,
+                    sendCallback);
+        break;
+      case ONEWAY:
+      case SYNC:
+        sendResult =
+            this.getMyberryClientFactory()
+                .getMyberryClientAPIImpl()
+                .queryClusterList(
+                    RequestCode.QUERY_CLUSTER_LIST,
+                    defaultAdminClient.getDefaultRouter().getMaintainerAddr(),
                     manageComponentRequestHeader,
                     timeout,
                     communicationMode);

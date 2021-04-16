@@ -24,9 +24,8 @@
 package org.myberry.client.admin;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import org.myberry.common.protocol.body.admin.CRComponentData;
-import org.myberry.common.protocol.body.admin.NSComponentData;
+import org.myberry.common.Component;
+import org.myberry.common.protocol.body.admin.ClusterListData;
 
 public class SendResult {
 
@@ -34,9 +33,10 @@ public class SendResult {
   private String remark;
 
   private String key;
-  private List<CRComponentData> componentsOfCR;
+  private Integer size;
+  private Component component;
 
-  private List<NSComponentData> componentsOfNS;
+  private ClusterListData clusterList;
 
   public SendResult(SendStatus sendStatus) {
     this.sendStatus = sendStatus;
@@ -71,20 +71,28 @@ public class SendResult {
     this.key = key;
   }
 
-  public List<CRComponentData> getComponentsOfCR() {
-    return componentsOfCR;
+  public Integer getSize() {
+    return size;
   }
 
-  public void setComponentsOfCR(List<CRComponentData> componentsOfCR) {
-    this.componentsOfCR = componentsOfCR;
+  public void setSize(Integer size) {
+    this.size = size;
   }
 
-  public List<NSComponentData> getComponentsOfNS() {
-    return componentsOfNS;
+  public Component getComponent() {
+    return component;
   }
 
-  public void setComponentsOfNS(List<NSComponentData> componentsOfNS) {
-    this.componentsOfNS = componentsOfNS;
+  public void setComponent(Component component) {
+    this.component = component;
+  }
+
+  public ClusterListData getClusterList() {
+    return clusterList;
+  }
+
+  public void setClusterList(ClusterListData clusterList) {
+    this.clusterList = clusterList;
   }
 
   @Override

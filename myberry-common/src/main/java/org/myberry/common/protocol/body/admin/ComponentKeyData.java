@@ -21,13 +21,32 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-package org.myberry.common.loadbalance;
+package org.myberry.common.protocol.body.admin;
 
-public class LoadBalanceName {
+import org.myberry.common.codec.LightCodec;
+import org.myberry.common.codec.MessageLite;
+import org.myberry.common.codec.annotation.SerialField;
 
-  public static final String RANDOM_LOADBALANCE = "random";
+public class ComponentKeyData implements MessageLite {
 
-  public static final String ROUNDROBIN_LOADBALANCE = "roundrobin";
+  @SerialField(ordinal = 0)
+  private String key;
 
-  public static final String CONSISTENTHASH_LOADBALANCE = "consistenthash";
+  public ComponentKeyData() {}
+
+  public ComponentKeyData(String key) {
+    this.key = key;
+  }
+
+  public byte[] encode() {
+    return LightCodec.toBytes(this);
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public void setKey(String key) {
+    this.key = key;
+  }
 }

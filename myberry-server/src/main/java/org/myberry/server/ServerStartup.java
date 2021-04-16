@@ -23,17 +23,19 @@
  */
 package org.myberry.server;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.myberry.common.MixAll;
+import org.myberry.common.MyberryVersion;
 import org.myberry.common.ServerConfig;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.remoting.common.RemotingHelper;
@@ -44,12 +46,8 @@ import org.myberry.remoting.protocol.RemotingCommand;
 import org.myberry.server.util.EnvironmentUtils;
 import org.myberry.server.util.ServerUtils;
 import org.myberry.store.config.StoreConfig;
-import org.myberry.common.MyberryVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
 
 public class ServerStartup {
 
@@ -118,13 +116,13 @@ public class ServerStartup {
         System.exit(-2);
       }
 
+      readMyberryProperties(serverConfig, nettyServerConfig, storeConfig);
+
       if (commandLine.hasOption('p')) {
         EnvironmentUtils.printConfig(false, serverConfig, storeConfig);
       } else if (commandLine.hasOption('m')) {
         EnvironmentUtils.printConfig(true, serverConfig, storeConfig);
       }
-
-      readMyberryProperties(serverConfig, nettyServerConfig, storeConfig);
 
       String haServerAddr = serverConfig.getHaServerAddr();
       if (null != haServerAddr) {

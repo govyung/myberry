@@ -6,11 +6,12 @@
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/govyung/myberry.svg)](http://isitmaintained.com/project/govyung/myberry "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/govyung/myberry.svg)](http://isitmaintained.com/project/govyung/myberry "Percentage of issues still open")
 
-MyBerry is a distributed ID construction engine. You can customize the ID production rules as you like.
+MyBerry is a distributed ID construction engine. You can customize the ID production rules as you
+like.
 
 ## Official Site
 
-[myberry.org](https://myberry.org) 
+[myberry.org](https://myberry.org)
 
 ## Features
 
@@ -32,10 +33,10 @@ Only supports Java 1.8
 <dependency>
 	<groupId>org.myberry</groupId>
 	<artifactId>myberry-client</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.0</version>
 </dependency>
 ```
 
 ## License
 
-MyBerry is under the MIT License. See the [LICENSE](https://myberry.org/license) file for details.
+MyBerry is under the MIT License. See the [LICENSE](https://myberry.org/license) file for details.

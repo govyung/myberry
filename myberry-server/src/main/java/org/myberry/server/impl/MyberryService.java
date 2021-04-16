@@ -24,16 +24,21 @@
 package org.myberry.server.impl;
 
 import java.util.Map;
+import org.myberry.common.Component;
 import org.myberry.common.SystemClock;
 import org.myberry.store.MyberryStore;
 
 public abstract class MyberryService {
 
+  public abstract PullIdResult getNewId(String key, Map<String, String> attachments);
+
   public abstract AdminManageResult addComponent(Object... obj);
 
-  public abstract Object queryComponentList(int pageNo, int pageSize);
+  public int queryComponentSize() {
+    return myberryStore.getComponentMap().size();
+  }
 
-  public abstract PullIdResult getNewId(String key, Map<String, String> attachments);
+  public abstract AdminManageResult queryComponentByKey(String key);
 
   public abstract String getServiceName();
 

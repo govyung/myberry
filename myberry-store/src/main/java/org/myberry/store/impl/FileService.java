@@ -59,7 +59,7 @@ public class FileService {
     return blockFile.getComponentMap().values();
   }
 
-  public BlockFile getBlockFile(int index){
+  public BlockFile getBlockFile(int index) {
     return blockFileList.get(index);
   }
 

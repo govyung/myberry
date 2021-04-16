@@ -31,32 +31,22 @@ import org.myberry.common.loadbalance.Invoker;
 public class HeartbeatData implements MessageLite {
 
   @SerialField(ordinal = 0)
-  private String loadBalanceName;
-
-  @SerialField(ordinal = 1)
   private String maintainer;
 
-  @SerialField(ordinal = 2)
+  @SerialField(ordinal = 1)
   private List<Invoker> invokers;
 
   /** ----only for admin----> */
-  @SerialField(ordinal = 3)
+  @SerialField(ordinal = 2)
   private int monitorCode;
 
-  @SerialField(ordinal = 4)
+  @SerialField(ordinal = 3)
   private String clusterName;
 
-  @SerialField(ordinal = 5)
+  @SerialField(ordinal = 4)
   private String info;
+
   /** <----only for admin---- */
-  public String getLoadBalanceName() {
-    return loadBalanceName;
-  }
-
-  public void setLoadBalanceName(String loadBalanceName) {
-    this.loadBalanceName = loadBalanceName;
-  }
-
   public String getMaintainer() {
     return maintainer;
   }

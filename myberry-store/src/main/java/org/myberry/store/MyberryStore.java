@@ -23,7 +23,6 @@
 */
 package org.myberry.store;
 
-import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 import org.myberry.store.config.StoreConfig;
 
@@ -49,9 +48,6 @@ public interface MyberryStore {
   /** Remove a component into store. */
   void removeComponent(String key);
 
-  /** Query All component. */
-  Collection<AbstractComponent> queryAllComponent();
-
   /** Got persistent mbid. */
   long getMbidFromDisk();
 
@@ -75,6 +71,7 @@ public interface MyberryStore {
 
   /**
    * Get component map.
+   *
    * @return
    */
   ConcurrentMap<String, AbstractComponent> getComponentMap();
@@ -129,12 +126,20 @@ public interface MyberryStore {
   void save();
 
   /**
-   * Update buffer
+   * Update long buffer
    *
    * @param index
    * @param value
    */
   void updateBufferLong(int index, long value);
+
+  /**
+   * Update int buffer
+   *
+   * @param index
+   * @param value
+   */
+  void updateBufferInt(int index, int value);
 
   /**
    * Check if the operation system page cache is busy or not.

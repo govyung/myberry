@@ -28,17 +28,8 @@ import org.myberry.common.loadbalance.Invoker;
 
 public class RouterInfo {
 
-  private String loadBalanceName;
   private String maintainer;
   private List<Invoker> invokers;
-
-  public String getLoadBalanceName() {
-    return loadBalanceName;
-  }
-
-  public void setLoadBalanceName(String loadBalanceName) {
-    this.loadBalanceName = loadBalanceName;
-  }
 
   public String getMaintainer() {
     return maintainer;
@@ -60,10 +51,7 @@ public class RouterInfo {
   public String toString() {
     return new StringBuffer() //
         .append("RouterInfo{") //
-        .append("loadBalanceName='") //
-        .append(loadBalanceName) //
-        .append('\'') //
-        .append(", maintainer='") //
+        .append("maintainer='") //
         .append(maintainer) //
         .append('\'') //
         .append(", invokers=") //

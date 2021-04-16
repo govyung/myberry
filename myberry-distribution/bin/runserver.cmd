@@ -14,7 +14,7 @@ set CLASSPATH=.;%BASE_DIR%conf;%CLASSPATH%
 rem ===========================================================================================
 rem  JVM Configuration
 rem ===========================================================================================
-set "JAVA_OPT=%JAVA_OPT% -server -Xmx64m -Xms64m"
+set "JAVA_OPT=%JAVA_OPT% -server -Xmx128m -Xms128m"
 set "JAVA_OPT=%JAVA_OPT% -XX:+UseG1GC"
 set "JAVA_OPT=%JAVA_OPT% -Djava.ext.dirs=%BASE_DIR%lib"
 set "JAVA_OPT=%JAVA_OPT% -cp %CLASSPATH%"

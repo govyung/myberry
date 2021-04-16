@@ -23,13 +23,12 @@
 */
 package org.myberry.server.impl;
 
-import java.util.List;
 import org.myberry.common.Component;
 
 public class AdminManageResult {
 
   private int respCode;
-  private List<Component> components;
+  private Component component;
 
   public AdminManageResult() {}
 
@@ -37,9 +36,9 @@ public class AdminManageResult {
     this.respCode = respCode;
   }
 
-  public AdminManageResult(int respCode, List<Component> components) {
+  public AdminManageResult(int respCode, Component component) {
     this.respCode = respCode;
-    this.components = components;
+    this.component = component;
   }
 
   public int getRespCode() {
@@ -50,11 +49,11 @@ public class AdminManageResult {
     this.respCode = respCode;
   }
 
-  public List<Component> getComponents() {
-    return components;
+  public Component getComponent() {
+    return component;
   }
 
-  public void setComponents(List<Component> components) {
-    this.components = components;
+  public void setComponent(Component component) {
+    this.component = component;
   }
 }

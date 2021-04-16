@@ -35,7 +35,6 @@ import org.myberry.server.expression.handler.SidHandler;
 import org.myberry.server.expression.impl.BufferStructObject;
 import org.myberry.server.expression.impl.PlaceholderObject;
 
-
 public class ConverterTest {
 
   @Test

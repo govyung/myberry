@@ -23,10 +23,7 @@
 */
 package org.myberry.server.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,7 +34,6 @@ import org.myberry.common.strategy.StrategyDate;
 import org.myberry.remoting.common.RemotingHelper;
 import org.myberry.remoting.protocol.RemotingSysResponseCode;
 import org.myberry.server.util.DateUtils;
-import org.myberry.store.AbstractComponent;
 import org.myberry.store.MyberryStore;
 import org.myberry.store.NSComponent;
 import org.myberry.store.common.LoggerName;
@@ -53,6 +49,57 @@ public class NSService extends MyberryService {
 
   public NSService(final MyberryStore myberryStore) {
     super(myberryStore);
+  }
+
+  @Override
+  public PullIdResult getNewId(String key, Map<String, String> attachments) {
+    if (!myberryStore.isExistKey(key)) {
+      log.warn("invalid key: {}", key);
+      return new PullIdResult(ResponseCode.KEY_NOT_EXISTED, emptyString());
+    }
+
+    NSComponent nsc = (NSComponent) myberryStore.getComponentMap().get(key);
+    nsc.getLock().lock();
+    try {
+      long beginLockTimestamp = this.getSystemClock().now();
+      myberryStore.setBeginTimeInLock(beginLockTimestamp);
+
+      if (isReset(nsc)) {
+        nsc.resetCurrentValue();
+      }
+
+      int start = nsc.getCurrentValue();
+
+      nsc.setUpdateTime(beginLockTimestamp);
+      nsc.incrementMbid();
+      nsc.setCurrentValue(nsc.getCurrentValue() + nsc.getStepSize());
+
+      myberryStore.updateBufferLong(
+          (int) nsc.getPhyOffset() + NSComponent.updateTimeHeader, nsc.getUpdateTime());
+      myberryStore.updateBufferLong(
+          (int) nsc.getPhyOffset() + NSComponent.mbidHeader, nsc.getMbid());
+      myberryStore.updateBufferInt(
+          (int) nsc.getPhyOffset() + NSComponent.currentValueHeader, nsc.getCurrentValue());
+      myberryStore.incrMbid();
+      if (this.isAlwaysFlush()) {
+        myberryStore.save();
+      }
+
+      myberryStore.setBeginTimeInLock(0);
+      return new PullIdResult(
+          ResponseCode.SUCCESS,
+          ProduceMode.NS.getProduceCode(),
+          start,
+          nsc.getCurrentValue() - 1,
+          myberryStore.getMySidFromDisk());
+    } catch (Exception e) {
+      myberryStore.setBeginTimeInLock(0);
+      log.error("getNewId() error: ", e.getMessage());
+      return new PullIdResult(
+          RemotingSysResponseCode.SYSTEM_ERROR, RemotingHelper.exceptionSimpleDesc(e));
+    } finally {
+      nsc.getLock().unlock();
+    }
   }
 
   @Override
@@ -109,81 +156,21 @@ public class NSService extends MyberryService {
   }
 
   @Override
-  public Object queryComponentList(int pageNo, int pageSize) {
-    Collection<AbstractComponent> componentList = myberryStore.queryAllComponent();
-
-    List<NSComponentData> component = new ArrayList<>();
-
-    pageNo = pageNo < 1 ? 1 : pageNo;
-    pageSize = pageSize < 0 ? 0 : pageSize;
-
-    int start = (pageNo - 1) * pageSize;
-    int end = start + pageSize;
-    end = end < componentList.size() ? end : componentList.size();
-
-    for (int i = start; i < end; i++) {
-      NSComponent nsc = (NSComponent) componentList.toArray()[i];
-      NSComponentData nscd = new NSComponentData();
-      nscd.setKey(nsc.getKey());
-      nscd.setValue(nsc.getInitValue());
-      nscd.setStepSize(nsc.getStepSize());
-      nscd.setResetType(nsc.getResetType());
-      nscd.setCode(NSComponentData.CODE);
-      component.add(nscd);
-    }
-
-    return component;
-  }
-
-  @Override
-  public PullIdResult getNewId(String key, Map<String, String> attachments) {
+  public AdminManageResult queryComponentByKey(String key) {
     if (!myberryStore.isExistKey(key)) {
       log.warn("invalid key: {}", key);
-      return new PullIdResult(ResponseCode.KEY_NOT_EXISTED, emptyString());
+      return new AdminManageResult(ResponseCode.KEY_NOT_EXISTED);
     }
 
     NSComponent nsc = (NSComponent) myberryStore.getComponentMap().get(key);
-    nsc.getLock().lock();
-    try {
-      long beginLockTimestamp = this.getSystemClock().now();
-      myberryStore.setBeginTimeInLock(beginLockTimestamp);
 
-      if (isReset(nsc)) {
-        nsc.resetCurrentValue();
-      }
-
-      int start = nsc.getCurrentValue();
-
-      nsc.setUpdateTime(beginLockTimestamp);
-      nsc.incrementMbid();
-      nsc.setCurrentValue(nsc.getCurrentValue() + nsc.getStepSize());
-
-      myberryStore.updateBufferLong(
-          (int) nsc.getPhyOffset() + NSComponent.updateTimeHeader, nsc.getUpdateTime());
-      myberryStore.updateBufferLong(
-          (int) nsc.getPhyOffset() + NSComponent.mbidHeader, nsc.getMbid());
-      myberryStore.updateBufferLong(
-          (int) nsc.getPhyOffset() + NSComponent.currentValueHeader, nsc.getCurrentValue());
-      myberryStore.incrMbid();
-      if (this.isAlwaysFlush()) {
-        myberryStore.save();
-      }
-
-      myberryStore.setBeginTimeInLock(0);
-      return new PullIdResult(
-          ResponseCode.SUCCESS,
-          ProduceMode.NS.getProduceCode(),
-          start,
-          nsc.getCurrentValue() - 1,
-          myberryStore.getMySidFromDisk());
-    } catch (Exception e) {
-      myberryStore.setBeginTimeInLock(0);
-      log.error("getNewId() error: ", e.getMessage());
-      return new PullIdResult(
-          RemotingSysResponseCode.SYSTEM_ERROR, RemotingHelper.exceptionSimpleDesc(e));
-    } finally {
-      nsc.getLock().unlock();
-    }
+    NSComponentData nscd = new NSComponentData();
+    nscd.setKey(key);
+    nscd.setValue(nsc.getInitValue());
+    nscd.setStepSize(nsc.getStepSize());
+    nscd.setResetType(nsc.getResetType());
+    nscd.setCode(NSComponentData.CODE);
+    return new AdminManageResult(ResponseCode.SUCCESS, nscd);
   }
 
   @Override

@@ -32,12 +32,11 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.myberry.common.loadbalance.Invoker;
 
-public class ConsistentHashLoadBalance implements LoadBalance {
+public class ConsistentHashLoadBalance {
 
   private final AtomicReference<ConsistentHashSelector> consistentHashSelector =
       new AtomicReference<>();
 
-  @Override
   public Invoker doSelect(List<Invoker> invokers, String key) {
     int identityHashCode = System.identityHashCode(invokers);
     ConsistentHashSelector selector = consistentHashSelector.get();

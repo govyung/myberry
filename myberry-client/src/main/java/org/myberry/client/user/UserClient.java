@@ -54,6 +54,35 @@ public interface UserClient {
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
 
+  PullResult pull(String key, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  PullResult pull(String key, HashMap<String, String> attachments, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  PullResult pull(String key, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  PullResult pull(String key, HashMap<String, String> attachments, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  PullResult pull(String key, String sessionKey, long timeout, int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  PullResult pull(
+      String key,
+      HashMap<String, String> attachments,
+      String sessionKey,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
   void pull(String key, PullCallback pullCallback)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException;
@@ -79,6 +108,42 @@ public interface UserClient {
       String key,
       HashMap<String, String> attachments,
       PullCallback pullCallback,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(String key, PullCallback pullCallback, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(
+      String key, HashMap<String, String> attachments, PullCallback pullCallback, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(String key, PullCallback pullCallback, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
+      long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(String key, PullCallback pullCallback, String sessionKey, long timeout, int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException;
+
+  void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
       long timeout,
       int timesRetry)
       throws RemotingException, InterruptedException, MyberryServerException,

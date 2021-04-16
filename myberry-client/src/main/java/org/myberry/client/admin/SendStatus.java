@@ -26,6 +26,7 @@ package org.myberry.client.admin;
 public enum SendStatus {
   SEND_OK,
   KEY_EXISTED,
+  KEY_NOT_EXISTED,
   DISK_FULL,
   PASSWORD_ERROR,
   DIFF_PRODUCE_MODE

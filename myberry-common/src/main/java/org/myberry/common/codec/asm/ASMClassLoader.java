@@ -42,6 +42,10 @@ public class ASMClassLoader extends ClassLoader {
                 });
   }
 
+  public ASMClassLoader() {
+    super(getParentClassLoader());
+  }
+
   public Class<?> defineClassByASM(String name, byte[] b, int off, int len)
       throws ClassFormatError {
     return defineClass(name, b, off, len, DOMAIN);

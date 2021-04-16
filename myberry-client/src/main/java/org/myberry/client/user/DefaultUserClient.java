@@ -64,8 +64,8 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
   }
 
   /**
-   * Pull id in synchronous mode. This method returns only when the pulling procedure totally
-   * completes.
+   * Use weighted round-robin load balance to pull id in synchronous mode. This method returns only
+   * when the pulling procedure totally completes.
    *
    * @param key required.
    * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
@@ -83,8 +83,8 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
   }
 
   /**
-   * Pull id in synchronous mode. This method returns only when the pulling procedure totally
-   * completes.
+   * Use weighted round-robin load balance to pull id in synchronous mode. This method returns only
+   * when the pulling procedure totally completes.
    *
    * @param key required.
    * @param attachments non-required.
@@ -184,8 +184,143 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
   }
 
   /**
-   * Pull id to server asynchronously. This method returns immediately. On pulling completion,
-   * <code>pullCallback</code> will be executed.
+   * Use consistent-hash load balance to pull id in synchronous mode. This method returns only when
+   * the pulling procedure totally completes.
+   *
+   * @param key required.
+   * @param sessionKey required, only for scheduling.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with server.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(String key, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pull(key, (HashMap) null, sessionKey);
+  }
+
+  /**
+   * Use consistent-hash load balance to pull id in synchronous mode. This method returns only when
+   * the pulling procedure totally completes.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param sessionKey required, only for scheduling.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with server.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(String key, HashMap<String, String> attachments, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return defaultUserClientImpl.pull(key, attachments, sessionKey);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, java.lang.String)} with pull timeout specified in
+   * addition.
+   *
+   * @param key required.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout pull timeout.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(String key, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pull(key, (HashMap) null, sessionKey, timeout);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, HashMap, java.lang.String)} with pull timeout specified
+   * in addition.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout pull timeout.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(
+      String key, HashMap<String, String> attachments, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return defaultUserClientImpl.pull(key, attachments, sessionKey, timeout);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, java.lang.String, long)} with pull retry specified in
+   * addition.
+   *
+   * @param key required.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout timeout in each time.
+   * @param timesRetry number of retries after request failed.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(String key, String sessionKey, long timeout, int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pull(key, (HashMap) null, sessionKey, timeout, timesRetry);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, HashMap, java.lang.String, long)} with pull retry
+   * specified in addition.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout timeout in each time.
+   * @param timesRetry number of retries after request failed.
+   * @return {@link PullResult} instance to inform pullers details of the deliverable, say key of
+   *     the id, {@link PullStatus} indicating id status, etc.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public PullResult pull(
+      String key,
+      HashMap<String, String> attachments,
+      String sessionKey,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return defaultUserClientImpl.pull(key, attachments, sessionKey, timeout, timesRetry);
+  }
+
+  /**
+   * Use weighted round-robin load balance to pull id in asynchronously mode. This method returns
+   * immediately. On pulling completion, <code>pullCallback</code> will be executed.
    *
    * @param key required.
    * @param pullCallback Callback to execute on pulling completed, either successful or
@@ -203,8 +338,8 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
   }
 
   /**
-   * Pull id to server asynchronously. This method returns immediately. On pulling completion,
-   * <code>pullCallback</code> will be executed.
+   * Use weighted round-robin load balance to pull id in asynchronously mode. This method returns
+   * immediately. On pulling completion, <code>pullCallback</code> will be executed.
    *
    * @param key required.
    * @param attachments non-required.
@@ -264,7 +399,7 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
   }
 
   /**
-   * Same to {@link #pull(java.lang.String, PullCallback, long)} with pull timeout specified in
+   * Same to {@link #pull(java.lang.String, PullCallback, long)} with pull retry specified in
    * addition.
    *
    * @param key required.
@@ -309,6 +444,148 @@ public class DefaultUserClient extends AbstractMyberryClient implements UserClie
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
     defaultUserClientImpl.pull(key, attachments, pullCallback, timeout, timesRetry);
+  }
+
+  /**
+   * Use consistent-hash load balance to pull id in asynchronously mode. This method returns
+   * immediately. On pulling completion, <code>pullCallback</code> will be executed.
+   *
+   * @param key required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(String key, PullCallback pullCallback, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pull(key, null, pullCallback, sessionKey);
+  }
+
+  /**
+   * Use consistent-hash load balance to pull id in asynchronously mode. This method returns
+   * immediately. On pulling completion, <code>pullCallback</code> will be executed.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(
+      String key, HashMap<String, String> attachments, PullCallback pullCallback, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    defaultUserClientImpl.pull(key, attachments, pullCallback, sessionKey);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, PullCallback, java.lang.String)} with pull timeout
+   * specified in addition.
+   *
+   * @param key required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout pull timeout.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(String key, PullCallback pullCallback, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pull(key, null, pullCallback, sessionKey, timeout);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, HashMap, PullCallback, java.lang.String)} with pull
+   * timeout specified in addition.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout pull timeout.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
+      long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    defaultUserClientImpl.pull(key, attachments, pullCallback, sessionKey, timeout);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, PullCallback, java.lang.String, long)} with pull retry
+   * specified in addition.
+   *
+   * @param key required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout timeout in each time.
+   * @param timesRetry number of retries after request failed.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(
+      String key, PullCallback pullCallback, String sessionKey, long timeout, int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pull(key, null, pullCallback, sessionKey, timeout, timesRetry);
+  }
+
+  /**
+   * Same to {@link #pull(java.lang.String, HashMap, PullCallback, java.lang.String, long)} with
+   * pull retry specified in addition.
+   *
+   * @param key required.
+   * @param attachments non-required.
+   * @param pullCallback Callback to execute on pulling completed, either successful or
+   *     unsuccessful.
+   * @param sessionKey required, only for scheduling.
+   * @param timeout timeout in each time.
+   * @param timesRetry number of retries after request failed.
+   * @throws RemotingException if there is any network-tier error.
+   * @throws MyberryServerException if there is any error with broker.
+   * @throws InterruptedException if the pulling thread is interrupted.
+   * @throws MyberryClientException if there is any error with client.
+   */
+  @Override
+  public void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    defaultUserClientImpl.pull(key, attachments, pullCallback, sessionKey, timeout, timesRetry);
   }
 
   /**

@@ -2,25 +2,25 @@
 * MIT License
 *
 * Copyright (c) 2020 gaoyang
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 package org.myberry.client.admin;
 
 import org.myberry.client.AbstractMyberryClient;
@@ -31,8 +31,8 @@ import org.myberry.client.spi.NoticeListener;
 import org.myberry.common.Component;
 import org.myberry.common.ProduceMode;
 import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.ComponentKeyData;
 import org.myberry.common.protocol.body.admin.NSComponentData;
-import org.myberry.common.protocol.body.admin.PageData;
 import org.myberry.remoting.exception.RemotingException;
 
 /** This class is the entry point for applications intending to manage component. */
@@ -74,8 +74,7 @@ public class DefaultAdminClient extends AbstractMyberryClient implements AdminCl
   }
 
   /**
-   * Create Component in synchronous mode. This method returns only when the sending procedure
-   * totally completes.
+   * Create Component.
    *
    * @param component component to send.
    * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
@@ -110,117 +109,100 @@ public class DefaultAdminClient extends AbstractMyberryClient implements AdminCl
   }
 
   /**
-   * Create component asynchronously. This method returns immediately. On sending completion, <code>
-   * sendCallback</code> will be executed.
+   * Query component size.
    *
-   * @param component component to send.
-   * @param sendCallback Callback to execute on sending completed, either successful or
-   *     unsuccessful.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public void createComponent(Component component, SendCallback sendCallback)
+  public SendResult queryComponentSize()
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.defaultAdminClientImpl.createComponent(
-        password, getProduceMode(component), component.encode(), sendCallback);
+    return this.defaultAdminClientImpl.queryComponentSize(password);
   }
 
   /**
-   * Same to {@link #createComponent(Component, SendCallback)} with send timeout specified in
-   * addition.
+   * Same to {@link #queryComponentSize()} with send timeout specified in addition.
    *
-   * @param component component to send.
    * @param timeout send timeout.
-   * @param sendCallback Callback to execute on sending completed, either successful or
-   *     unsuccessful.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public void createComponent(Component component, long timeout, SendCallback sendCallback)
+  public SendResult queryComponentSize(long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.defaultAdminClientImpl.createComponent(
-        password, getProduceMode(component), component.encode(), timeout, sendCallback);
+    return this.defaultAdminClientImpl.queryComponentSize(password, timeout);
   }
 
   /**
-   * Query all component in synchronous mode. This method returns only when the sending procedure
-   * totally completes.
+   * Query component by key.
    *
-   * @param pageNo
-   * @param pageSize
-   * @return {@link SendResult} instance to inform senders details of the deliverable, say result
-   *     list of the component, {@link SendStatus} indicating component status, etc.
+   * @param key component key.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public SendResult queryAllComponent(int pageNo, int pageSize)
+  public SendResult queryComponentByKey(String key)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.defaultAdminClientImpl.queryAllComponent(
-        new PageData(pageNo, pageSize).encode(), password);
+    return this.defaultAdminClientImpl.queryComponentByKey(
+        new ComponentKeyData(key).encode(), password);
   }
 
   /**
-   * Same to {@link #queryAllComponent(int, int)} with send timeout specified in addition.
+   * Same to {@link #queryComponentByKey(String)} with send timeout specified in addition.
    *
-   * @param pageNo
-   * @param pageSize
+   * @param key component key.
    * @param timeout send timeout.
-   * @return {@link SendResult} instance to inform senders details of the deliverable, say result
-   *     list of the component, {@link SendStatus} indicating component status, etc.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public SendResult queryAllComponent(int pageNo, int pageSize, long timeout)
+  public SendResult queryComponentByKey(String key, long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
-    return this.defaultAdminClientImpl.queryAllComponent(
-        new PageData(pageNo, pageSize).encode(), password, timeout);
+    return this.defaultAdminClientImpl.queryComponentByKey(
+        new ComponentKeyData(key).encode(), password, timeout);
   }
 
   /**
-   * Query all component asynchronously. This method returns immediately. On sending completion,
-   * <code>sendCallback</code> will be executed.
+   * Query cluster list.
    *
-   * @param pageNo
-   * @param pageSize
-   * @param sendCallback Callback to execute on sending completed, either successful or
-   *     unsuccessful.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public void queryAllComponent(int pageNo, int pageSize, SendCallback sendCallback)
+  public SendResult queryClusterList()
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.defaultAdminClientImpl.queryAllComponent(
-        new PageData(pageNo, pageSize).encode(), password, sendCallback);
+    return this.defaultAdminClientImpl.queryClusterList(password);
   }
 
   /**
-   * Same to {@link #queryAllComponent(int, int, SendCallback)} with send timeout specified in
-   * addition.
+   * Same to {@link #queryClusterList()} with send timeout specified in addition.
    *
-   * @param pageNo
-   * @param pageSize
    * @param timeout send timeout.
-   * @param sendCallback Callback to execute on sending completed, either successful or
-   *     unsuccessful.
+   * @return {@link SendResult} instance to inform senders details of the deliverable, say result of
+   *     the component, {@link SendStatus} indicating component status, etc.
    * @throws RemotingException if there is any network-tier error.
    * @throws MyberryServerException if there is any error with broker.
    * @throws InterruptedException if the sending thread is interrupted.
    */
   @Override
-  public void queryAllComponent(int pageNo, int pageSize, long timeout, SendCallback sendCallback)
+  public SendResult queryClusterList(long timeout)
       throws RemotingException, InterruptedException, MyberryServerException {
-    this.defaultAdminClientImpl.queryAllComponent(
-        new PageData(pageNo, pageSize).encode(), password, timeout, sendCallback);
+    return this.defaultAdminClientImpl.queryClusterList(password, timeout);
   }
 
   public String getPassword() {

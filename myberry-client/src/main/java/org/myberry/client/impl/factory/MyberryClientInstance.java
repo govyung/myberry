@@ -23,15 +23,14 @@
 */
 package org.myberry.client.impl.factory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReentrantLock;
 import org.myberry.client.AbstractMyberryClient;
 import org.myberry.client.ClientConfig;
 import org.myberry.client.admin.DefaultAdminClient;
@@ -42,6 +41,7 @@ import org.myberry.client.impl.MyberryClientAPIImpl;
 import org.myberry.client.impl.MyberryClientManager;
 import org.myberry.client.monitor.MonitorService;
 import org.myberry.client.router.DefaultRouter;
+import org.myberry.common.MixAll;
 import org.myberry.common.ServiceState;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.protocol.header.HeartbeatRequestHeader;
@@ -75,17 +75,17 @@ public class MyberryClientInstance {
     this.instanceIndex = instanceIndex;
 
     this.nettyClientConfig = new NettyClientConfig();
-    this.myberryClientAPIImpl = new MyberryClientAPIImpl(this.nettyClientConfig);
-    this.defaultRouter = new DefaultRouter(this.clientConfig);
+    this.myberryClientAPIImpl = new MyberryClientAPIImpl(nettyClientConfig);
+    this.defaultRouter = new DefaultRouter();
     this.keepaliveService = new KeepaliveService();
     this.monitorService = new MonitorService();
     this.clientId = clientId;
 
-    this.clientInstanceName.append(this.clientConfig.getClientIP());
+    this.clientInstanceName.append(clientConfig.getClientIP());
     this.clientInstanceName.append("-");
     this.clientInstanceName.append(instanceIndex);
 
-    this.abstractMyberryClient.setDefaultRouter(this.defaultRouter);
+    this.abstractMyberryClient.setDefaultRouter(defaultRouter);
   }
 
   public void start() throws MyberryClientException {
@@ -150,9 +150,9 @@ public class MyberryClientInstance {
   }
 
   private class KeepaliveService {
-    private static final long HEARTBEAT_TIMEOUT_MILLIS = 3000;
+    private final long HEARTBEAT_TIMEOUT_MILLIS = 3000L;
+    private volatile boolean latestHeartbeat = false;
 
-    private final Lock lockHeartbeat = new ReentrantLock();
     private final ScheduledExecutorService scheduledExecutorService =
         Executors.newSingleThreadScheduledExecutor(
             new ThreadFactory() {
@@ -167,78 +167,75 @@ public class MyberryClientInstance {
     }
 
     void startScheduledTask() throws MyberryClientException {
-      this.initConnectServer();
-      if (!defaultRouter.isSingleInstance()) {
-        this.scheduledExecutorService.scheduleAtFixedRate(
-            new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  sendHeartbeat(defaultRouter.fetchServerAddr());
-                } catch (MyberryClientException e) {
-                  log.error("scheduledTask sendHeartbeat exception: ", e);
-                }
-              }
-            },
-            0,
-            clientConfig.getHeartbeatServerInterval(),
-            TimeUnit.MILLISECONDS);
-      }
+      this.tryConnectServer();
+
+      this.scheduledExecutorService.scheduleAtFixedRate(
+          new Runnable() {
+            @Override
+            public void run() {
+              sendHeartbeat(defaultRouter.getHeartbeatServerAddr(latestHeartbeat));
+            }
+          },
+          0,
+          clientConfig.getHeartbeatServerInterval(),
+          TimeUnit.MILLISECONDS);
     }
 
     private void sendHeartbeat(String addr) {
-      if (this.lockHeartbeat.tryLock()) {
-        try {
-          HeartbeatRequestHeader requestHeader = new HeartbeatRequestHeader();
-          requestHeader.setClientId(clientId);
+      try {
+        HeartbeatRequestHeader requestHeader = new HeartbeatRequestHeader();
+        requestHeader.setClientId(clientId);
 
-          DefaultAdminClient defaultAdminClient = null;
-          if (MyberryClientInstance.this.abstractMyberryClient instanceof DefaultAdminClient) {
-            defaultAdminClient =
-                (DefaultAdminClient) MyberryClientInstance.this.abstractMyberryClient;
-            requestHeader.setPassword(defaultAdminClient.getPassword());
-          }
-
-          HeartbeatResult heartbeatResult =
-              MyberryClientInstance.this.myberryClientAPIImpl.sendHearbeat(
-                  addr, requestHeader, HEARTBEAT_TIMEOUT_MILLIS);
-          if (heartbeatResult != null) {
-            log.debug("recvHeartbeat success from {}", addr);
-            if (heartbeatResult.getRouterInfo() != null) {
-              defaultRouter.setRouterInfo(heartbeatResult.getRouterInfo());
-            }
-            if (heartbeatResult.getBreakdownInfo() != null
-                && defaultAdminClient != null
-                && defaultAdminClient.getNoticeListener() != null) {
-              if (monitorService.getNoticeListener() == null) {
-                monitorService.setNoticeListener(defaultAdminClient.getNoticeListener());
-              }
-              monitorService.notification(heartbeatResult.getBreakdownInfo());
-            }
-            defaultRouter.setRetryInvoker(false);
-          }
-        } catch (Exception e) {
-          log.error("sendHeartbeat exception: ", e);
-          defaultRouter.setRetryInvoker(true);
-        } finally {
-          this.lockHeartbeat.unlock();
+        DefaultAdminClient defaultAdminClient = null;
+        if (MyberryClientInstance.this.abstractMyberryClient instanceof DefaultAdminClient) {
+          defaultAdminClient =
+              (DefaultAdminClient) MyberryClientInstance.this.abstractMyberryClient;
+          requestHeader.setPassword(defaultAdminClient.getPassword());
         }
+
+        HeartbeatResult heartbeatResult =
+            MyberryClientInstance.this.myberryClientAPIImpl.sendHearbeat(
+                addr, requestHeader, HEARTBEAT_TIMEOUT_MILLIS);
+        if (heartbeatResult != null) {
+          log.debug("recvHeartbeat success from {}", addr);
+          if (heartbeatResult.getRouterInfo() != null) {
+            defaultRouter.setRouterInfoByHeartbeat(heartbeatResult.getRouterInfo());
+          }
+          if (heartbeatResult.getBreakdownInfo() != null
+              && defaultAdminClient != null
+              && defaultAdminClient.getNoticeListener() != null) {
+            if (monitorService.getNoticeListener() == null) {
+              monitorService.setNoticeListener(defaultAdminClient.getNoticeListener());
+            }
+            monitorService.notification(heartbeatResult.getBreakdownInfo());
+          }
+          this.latestHeartbeat = true;
+        }
+      } catch (Exception e) {
+        log.error("sendHeartbeat exception: ", e);
+        this.latestHeartbeat = false;
       }
     }
 
-    private void initConnectServer() throws MyberryClientException {
-      int timesRetry = 0;
-      boolean gotStartHeartbeatResponse = false;
-      do {
-        timesRetry++;
-        String addr = defaultRouter.initAddrs(timesRetry);
-        log.info("retry server: {}", addr);
+    private void tryConnectServer() throws MyberryClientException {
+      String serverAddr = MyberryClientInstance.this.clientConfig.getServerAddr();
+      if (MixAll.isBlank(serverAddr)) {
+        throw new MyberryClientException("serverAddr is null");
+      }
+
+      List<String> addrs = Arrays.asList(serverAddr.split(","));
+      for (String addr : addrs) {
+        log.info("try connect server: {}", addr);
         sendHeartbeat(addr);
-        if (!defaultRouter.isRetryInvoker()) {
-          gotStartHeartbeatResponse = true;
+        if (latestHeartbeat) {
+          break;
         }
-        LockSupport.parkNanos(1L);
-      } while (!gotStartHeartbeatResponse);
+      }
+
+      if (!latestHeartbeat) {
+        throw new MyberryClientException(
+            String.format("can't connect server, serverAddr is [%s]", serverAddr));
+      }
     }
   }
 

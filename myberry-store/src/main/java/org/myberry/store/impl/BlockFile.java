@@ -150,6 +150,10 @@ public class BlockFile {
     mappedByteBuffer.putLong(index, value);
   }
 
+  public void updateBufferInt(int index, int value) {
+    mappedByteBuffer.putInt(index, value);
+  }
+
   public long getMbid() {
     return storeHeader.getMbid();
   }

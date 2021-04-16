@@ -87,8 +87,7 @@ public class QuorumPeer implements Quorum {
     int mySidFromDisk = myberryStore.getMySidFromDisk();
     if (mySidFromDisk == 0 && mySidFromSettings > 0) {
       myberryStore.setMySid(mySidFromSettings);
-      log.info(
-          "*****  mysid first initialized, mysid: {}  *****", myberryStore.getMySidFromDisk());
+      log.info("*****  mysid first initialized, mysid: {}  *****", myberryStore.getMySidFromDisk());
     } else if (mySidFromSettings > 0 && mySidFromSettings == mySidFromDisk) {
       log.info("*****  mysid: {}  *****", mySidFromSettings);
     } else {

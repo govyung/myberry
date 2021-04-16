@@ -24,21 +24,16 @@
 package org.myberry.client.router;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.myberry.client.ClientConfig;
-import org.myberry.client.exception.MyberryClientException;
+import org.myberry.client.exception.MyberryRuntimeException;
 import org.myberry.client.router.loadbalance.ConsistentHashLoadBalance;
-import org.myberry.client.router.loadbalance.LoadBalance;
-import org.myberry.client.router.loadbalance.RandomLoadBalance;
 import org.myberry.client.router.loadbalance.RoundRobinLoadBalance;
 import org.myberry.common.MixAll;
 import org.myberry.common.constant.LoggerName;
 import org.myberry.common.loadbalance.Invoker;
-import org.myberry.common.loadbalance.LoadBalanceName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,224 +41,112 @@ public class DefaultRouter {
 
   private static final Logger log = LoggerFactory.getLogger(LoggerName.CLIENT_LOGGER_NAME);
 
-  private static final Map<String, Class<?>> loadBalanceRegistry = new HashMap<>();
+  private static final RoundRobinLoadBalance roundRobin = new RoundRobinLoadBalance();
+  private static final ConsistentHashLoadBalance consistentHash = new ConsistentHashLoadBalance();
 
-  static {
-    loadBalanceRegistry.put(LoadBalanceName.RANDOM_LOADBALANCE, RandomLoadBalance.class);
-    loadBalanceRegistry.put(LoadBalanceName.ROUNDROBIN_LOADBALANCE, RoundRobinLoadBalance.class);
-    loadBalanceRegistry.put(
-        LoadBalanceName.CONSISTENTHASH_LOADBALANCE, ConsistentHashLoadBalance.class);
-  }
-
-  private final ClientConfig clientConfig;
-
-  private final AtomicReference<LoadBalance> lb = new AtomicReference<>();
   private final AtomicReference<String> maintainer = new AtomicReference<>();
   private final AtomicReference<List<Invoker>> invokers = new AtomicReference<>();
 
-  private volatile boolean retryInvoker = false;
+  private final AtomicReference<List<String>> backupSrv = new AtomicReference<>();
+  private final AtomicInteger backupSrvIndex = new AtomicInteger(initValueIndex());
 
-  private List<String> serverAddrs;
-  private int invokersRetryIndex;
-  private int serverAddrRetryIndex;
+  private static int initValueIndex() {
+    Random r = new Random();
 
-  public DefaultRouter(ClientConfig clientConfig) {
-    this.clientConfig = clientConfig;
+    return Math.abs(r.nextInt() % 999) % 999;
   }
 
-  /**
-   * Try all nodes to get routing information for init
-   *
-   * @return
-   */
-  public String initAddrs(int timesRetry) throws MyberryClientException {
-    this.initServerAddrs();
-    if (timesRetry <= serverAddrs.size()) {
-      return getAddrFromServerAddr();
+  public String getHeartbeatServerAddr(boolean latestHeartbeat) {
+    if (latestHeartbeat) {
+      return maintainer.get();
     } else {
-      throw new MyberryClientException("cannot connect to server: " + clientConfig.getServerAddr());
+      int index = this.backupSrvIndex.incrementAndGet();
+      index = Math.abs(index);
+      index = index % backupSrv.get().size();
+      return backupSrv.get().get(index);
     }
   }
 
-  public boolean isRetryInvoker() {
-    return retryInvoker;
-  }
-
-  public void setRetryInvoker(boolean retryInvoker) {
-    this.retryInvoker = retryInvoker;
-  }
-
-  /** for heartbeat */
-  public String fetchServerAddr() throws MyberryClientException {
-    String addr = this.getAddrFromMaintainer();
-    if (addr == null || retryInvoker) {
-      addr = this.getAddrFromInvoker();
-      if (addr == null) {
-        addr = this.getAddrFromServerAddr();
-      }
-    } else {
-      invokersRetryIndex = 0;
-      serverAddrRetryIndex = 0;
+  public void setRouterInfoByHeartbeat(RouterInfo routerInfo) {
+    boolean maintainerChange = false;
+    if (routerInfo.getMaintainer() != null
+        && !"".equals(routerInfo.getMaintainer())
+        && !routerInfo.getMaintainer().equals(maintainer.get())) {
+      maintainerChange = true;
+      log.info(
+          "remoting maintainer address updated. NEW : {} , OLD: {}",
+          routerInfo.getMaintainer(),
+          maintainer.get());
+      maintainer.set(routerInfo.getMaintainer());
     }
-    return addr;
-  }
 
-  /** for heartbeat */
-  public void setRouterInfo(RouterInfo routerInfo) {
-    LoadBalance loadBalance = lb.get();
-    if (loadBalance == null
-        || loadBalanceRegistry.get(routerInfo.getLoadBalanceName()) == null
-        || loadBalanceRegistry.get(routerInfo.getLoadBalanceName()) != loadBalance.getClass()) {
-
-      maintainer.set(
-          routerInfo.getMaintainer() == null
-              ? clientConfig.getServerAddr()
-              : routerInfo.getMaintainer());
-
-      List<Invoker> invokerList = new ArrayList<>();
-      invokerList.add(new Invoker(clientConfig.getServerAddr(), 1));
-      invokers.set(routerInfo.getInvokers() == null ? invokerList : routerInfo.getInvokers());
-
-      loadBalance =
-          LoadBalanceFactory.factoryLoadBalance(
-              routerInfo.getLoadBalanceName() == null
-                  ? LoadBalanceName.ROUNDROBIN_LOADBALANCE
-                  : routerInfo.getLoadBalanceName());
-      lb.set(loadBalance);
-      log.info("client load balance changed. NEW : {}", routerInfo.getLoadBalanceName());
-    } else {
-      if (routerInfo.getMaintainer() != null
-          && !routerInfo.getMaintainer().equals(maintainer.get())) {
-        log.info(
-            "remoting maintainer address updated. NEW : {} , OLD: {}",
-            routerInfo.getMaintainer(),
-            maintainer.get());
-        maintainer.set(routerInfo.getMaintainer());
-      }
-
-      if (routerInfo.getInvokers() != null) {
-        if (routerInfo.getInvokers().size() != invokers.get().size()) {
-          log.info(
-              "remoting invokers address updated. NEW : {} , OLD: {}",
-              routerInfo.getInvokers(),
-              invokers.get());
-          invokers.set(routerInfo.getInvokers());
-          return;
-        }
-
-        boolean nodeChange = false;
+    boolean invokerChange = false;
+    if (routerInfo.getInvokers() != null && routerInfo.getInvokers().size() != 0) {
+      if (null == invokers.get() || routerInfo.getInvokers().size() != invokers.get().size()) {
+        invokerChange = true;
+      } else {
         for (Invoker invokerRemote : routerInfo.getInvokers()) {
           for (Invoker invokerLocal : invokers.get()) {
             if (invokerRemote.equals(invokerLocal)) {
-              nodeChange = false;
+              invokerChange = false;
               break;
             } else {
-              nodeChange = true;
+              invokerChange = true;
             }
           }
-          if (nodeChange) {
+          if (invokerChange) {
             break;
           }
         }
+      }
 
-        if (nodeChange) {
-          log.info(
-              "remoting invokers address updated. NEW : {} , OLD: {}",
-              routerInfo.getInvokers(),
-              invokers.get());
-          invokers.set(routerInfo.getInvokers());
-        }
+      if (invokerChange) {
+        log.info(
+            "remoting invokers address updated. NEW : {} , OLD: {}",
+            routerInfo.getInvokers(),
+            invokers.get());
+        invokers.set(routerInfo.getInvokers());
       }
     }
-  }
 
-  /**
-   * for admin
-   *
-   * @return addr
-   */
-  public String getMaintainerAddr() {
-    return this.getAddrFromMaintainer();
-  }
+    boolean backupChange = maintainerChange | invokerChange;
+    if (backupChange) {
+      List<String> backup = new ArrayList<>();
+      backup.add(routerInfo.getMaintainer());
 
-  /**
-   * for user
-   *
-   * @return
-   */
-  public LoadBalance getLoadBalance() {
-    return lb.get();
-  }
-
-  /**
-   * for user
-   *
-   * @return
-   */
-  public Invoker getInvoker(LoadBalance loadbalance, List<Invoker> invokers, String key) {
-    if (loadbalance == null || invokers == null) {
-      return null;
+      for (Invoker newInvoker : routerInfo.getInvokers()) {
+        if (!backup.contains(newInvoker.getAddr())) {
+          backup.add(newInvoker.getAddr());
+        }
+      }
+      backupSrv.set(backup);
     }
+  }
 
-    return loadbalance.doSelect(invokers, key);
+  public String getMaintainerAddr() {
+    return maintainer.get();
   }
 
   public List<Invoker> getInvokers() {
     return invokers.get();
   }
 
-  private String getAddrFromMaintainer() {
-    return maintainer.get();
-  }
-
-  private String getAddrFromInvoker() {
-    String addr = null;
-
-    List<Invoker> invokers = this.invokers.get();
-    if (invokers != null) {
-      if (invokersRetryIndex < invokers.size()) {
-        addr = invokers.get(invokersRetryIndex).getAddr();
-        invokersRetryIndex++;
-      } else {
-        invokersRetryIndex = 0;
-        addr = invokers.get(invokersRetryIndex).getAddr();
-      }
+  public Invoker getInvoker(List<Invoker> invokers) {
+    if (null == invokers) {
+      throw new MyberryRuntimeException("invokers is null");
     }
 
-    return addr;
+    return roundRobin.doSelect(invokers);
   }
 
-  private String getAddrFromServerAddr() throws MyberryClientException {
-    this.checkServerAddrs();
-
-    String addr = null;
-    this.initServerAddrs();
-    if (serverAddrRetryIndex < this.serverAddrs.size()) {
-      addr = this.serverAddrs.get(serverAddrRetryIndex);
-      serverAddrRetryIndex++;
-    } else {
-      serverAddrRetryIndex = 0;
-      addr = this.serverAddrs.get(serverAddrRetryIndex);
+  public Invoker getInvoker(List<Invoker> invokers, String sessionKey) {
+    if (null == invokers) {
+      throw new MyberryRuntimeException("invokers is null");
+    }
+    if (MixAll.isBlank(sessionKey)) {
+      throw new MyberryRuntimeException("sessionKey is blank");
     }
 
-    return addr;
-  }
-
-  public void checkServerAddrs() throws MyberryClientException {
-    if (MixAll.isBlank(this.clientConfig.getServerAddr())) {
-      throw new MyberryClientException("serverAddr is null");
-    }
-  }
-
-  public boolean isSingleInstance() throws MyberryClientException {
-    this.checkServerAddrs();
-    this.initServerAddrs();
-    return serverAddrs.size() == 1;
-  }
-
-  private void initServerAddrs() {
-    if (this.serverAddrs == null) {
-      this.serverAddrs = Arrays.asList(this.clientConfig.getServerAddr().split(","));
-    }
+    return consistentHash.doSelect(invokers, sessionKey);
   }
 }

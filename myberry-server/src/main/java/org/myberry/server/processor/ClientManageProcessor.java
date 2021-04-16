@@ -21,13 +21,17 @@
 package org.myberry.server.processor;
 
 import io.netty.channel.ChannelHandlerContext;
+import java.util.ArrayList;
+import java.util.List;
 import org.myberry.common.codec.LightCodec;
 import org.myberry.common.constant.LoggerName;
+import org.myberry.common.loadbalance.Invoker;
 import org.myberry.common.monitor.MonitorCode;
 import org.myberry.common.protocol.RequestCode;
 import org.myberry.common.protocol.ResponseCode;
 import org.myberry.common.protocol.body.HeartbeatData;
 import org.myberry.common.protocol.header.HeartbeatRequestHeader;
+import org.myberry.remoting.common.RemotingHelper;
 import org.myberry.remoting.netty.NettyRequestProcessor;
 import org.myberry.remoting.protocol.RemotingCommand;
 import org.myberry.server.ServerController;
@@ -70,7 +74,6 @@ public class ClientManageProcessor implements NettyRequestProcessor {
     HeartbeatData heartbeatData = new HeartbeatData();
 
     if (serverController.getServerConfig().getClusterName() != null) {
-      heartbeatData.setLoadBalanceName(serverController.getServerConfig().getLoadbalance());
       heartbeatData.setMaintainer(serverController.getRouteInfoManager().getLeaderInfo());
       heartbeatData.setInvokers(serverController.getRouteInfoManager().getLearnerInfo());
       if (notOnlyRouterInfo) {
@@ -82,6 +85,16 @@ public class ClientManageProcessor implements NettyRequestProcessor {
               new StringBuilder().append("lose server ").append(lostLearner).toString());
         }
       }
+    } else {
+      String phyLocalAddress = RemotingHelper.getPhyLocalAddress();
+      int listenPort = serverController.getNettyServerConfig().getListenPort();
+      String address = RemotingHelper.makeStringAddress(phyLocalAddress, listenPort);
+
+      List<Invoker> invokers = new ArrayList<>();
+      invokers.add(new Invoker(address, 1));
+
+      heartbeatData.setMaintainer(address);
+      heartbeatData.setInvokers(invokers);
     }
 
     response.setCode(ResponseCode.SUCCESS);

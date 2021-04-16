@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 import org.myberry.common.SystemClock;
 import org.myberry.store.common.LoggerName;
@@ -67,11 +66,6 @@ public class DefaultMyberryStore implements MyberryStore {
 
   @Override
   public void removeComponent(String key) {}
-
-  @Override
-  public Collection<AbstractComponent> queryAllComponent() {
-    return fileService.queryAllComponent();
-  }
 
   @Override
   public long getMbidFromDisk() {
@@ -176,6 +170,11 @@ public class DefaultMyberryStore implements MyberryStore {
   @Override
   public void updateBufferLong(int index, long value) {
     this.fileService.getBlockFile(0).updateBufferLong(index, value);
+  }
+
+  @Override
+  public void updateBufferInt(int index, int value) {
+    this.fileService.getBlockFile(0).updateBufferInt(index, value);
   }
 
   @Override

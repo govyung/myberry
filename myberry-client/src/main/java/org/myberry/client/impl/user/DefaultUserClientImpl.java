@@ -101,7 +101,7 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
       String key, HashMap<String, String> attachments, long timeout, int timesRetry)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
-    return this.pullDefaultImpl(
+    return this.pullWithoutStatusImpl(
         key, attachments, CommunicationMode.SYNC, null, timeout, timesRetry);
   }
 
@@ -126,11 +126,11 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
       int timesRetry)
       throws RemotingException, InterruptedException, MyberryServerException,
           MyberryClientException {
-    this.pullDefaultImpl(
+    this.pullWithoutStatusImpl(
         key, attachments, CommunicationMode.ASYNC, pullCallback, timeout, timesRetry);
   }
 
-  private PullResult pullDefaultImpl( //
+  private PullResult pullWithoutStatusImpl( //
       String key, //
       HashMap<String, String> attachments, //
       final CommunicationMode communicationMode, //
@@ -160,6 +160,107 @@ public class DefaultUserClientImpl extends AbstractClientImpl {
         pullResult =
             defaultUserInvoker.pull(
                 pullIdBackRequestHeader, attachments, timeout, timesRetry, communicationMode);
+        break;
+      default:
+        assert false;
+        break;
+    }
+    return pullResult;
+  }
+
+  public PullResult pull(String key, HashMap<String, String> attachments, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pull(key, attachments, sessionKey, defaultUserClient.getPullMsgTimeout());
+  }
+
+  public PullResult pull(
+      String key, HashMap<String, String> attachments, String sessionKey, long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pull(key, attachments, sessionKey, timeout, 0);
+  }
+
+  public PullResult pull(
+      String key,
+      HashMap<String, String> attachments,
+      String sessionKey,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    return this.pullWithStatusImpl(
+        key, attachments, CommunicationMode.SYNC, null, sessionKey, timeout, timesRetry);
+  }
+
+  public void pull(
+      String key, HashMap<String, String> attachments, PullCallback pullCallback, String sessionKey)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pull(key, attachments, pullCallback, sessionKey, defaultUserClient.getPullMsgTimeout());
+  }
+
+  public void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
+      long timeout)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pull(key, attachments, pullCallback, sessionKey, timeout, 0);
+  }
+
+  public void pull(
+      String key,
+      HashMap<String, String> attachments,
+      PullCallback pullCallback,
+      String sessionKey,
+      long timeout,
+      int timesRetry)
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    this.pullWithStatusImpl(
+        key, attachments, CommunicationMode.ASYNC, pullCallback, sessionKey, timeout, timesRetry);
+  }
+
+  private PullResult pullWithStatusImpl( //
+      String key, //
+      HashMap<String, String> attachments, //
+      final CommunicationMode communicationMode, //
+      final PullCallback pullCallback, //
+      final String sessionKey, //
+      final long timeout, //
+      final int timesRetry //
+      )
+      throws RemotingException, InterruptedException, MyberryServerException,
+          MyberryClientException {
+    PullIdBackRequestHeader pullIdBackRequestHeader = new PullIdBackRequestHeader();
+    pullIdBackRequestHeader.setKey(key);
+
+    PullResult pullResult = null;
+    switch (communicationMode) {
+      case ASYNC:
+        pullResult =
+            defaultUserInvoker.pull(
+                pullIdBackRequestHeader,
+                attachments,
+                sessionKey,
+                timeout,
+                timesRetry,
+                communicationMode,
+                pullCallback);
+        break;
+      case ONEWAY:
+      case SYNC:
+        pullResult =
+            defaultUserInvoker.pull(
+                pullIdBackRequestHeader,
+                attachments,
+                sessionKey,
+                timeout,
+                timesRetry,
+                communicationMode);
         break;
       default:
         assert false;

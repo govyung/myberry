@@ -46,7 +46,7 @@ public class StoreComponent {
           String
           /** key */
           ,
-      AbstractComponent>
+          AbstractComponent>
       componentMap = new ConcurrentHashMap<String, AbstractComponent>();
 
   private final MappedByteBuffer mappedByteBuffer;

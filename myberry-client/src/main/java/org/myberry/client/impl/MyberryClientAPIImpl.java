@@ -40,8 +40,10 @@ import org.myberry.common.monitor.MonitorCode;
 import org.myberry.common.protocol.RequestCode;
 import org.myberry.common.protocol.ResponseCode;
 import org.myberry.common.protocol.body.HeartbeatData;
-import org.myberry.common.protocol.body.admin.AllCRComponentData;
-import org.myberry.common.protocol.body.admin.AllNSComponentData;
+import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.ClusterListData;
+import org.myberry.common.protocol.body.admin.ComponentSizeData;
+import org.myberry.common.protocol.body.admin.NSComponentData;
 import org.myberry.common.protocol.body.user.CRPullResultData;
 import org.myberry.common.protocol.body.user.NSPullResultData;
 import org.myberry.common.protocol.header.admin.ManageComponentResponseHeader;
@@ -81,24 +83,24 @@ public class MyberryClientAPIImpl {
 
   public PullResult pull( //
       final String addr, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode //
       ) throws RemotingException, InterruptedException, MyberryServerException {
-    return pull(addr, requstHeader, attachments, timeoutMillis, communicationMode, null);
+    return pull(addr, requestHeader, attachments, timeoutMillis, communicationMode, null);
   }
 
   public PullResult pull( //
       final String addr, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode, //
       final PullCallback pullCallback //
       ) throws RemotingException, InterruptedException, MyberryServerException {
     RemotingCommand request =
-        RemotingCommand.createRequestCommand(RequestCode.PULL_ID, requstHeader);
+        RemotingCommand.createRequestCommand(RequestCode.PULL_ID, requestHeader);
     request.setBody(Maps.serialize(attachments));
     switch (communicationMode) {
       case ONEWAY:
@@ -195,51 +197,97 @@ public class MyberryClientAPIImpl {
       final int code, //
       final String addr, //
       byte[] componentData, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode //
       ) throws RemotingException, InterruptedException, MyberryServerException {
     return this.createComponent(
-        code, addr, componentData, requstHeader, timeoutMillis, communicationMode, null);
+        code, addr, componentData, requestHeader, timeoutMillis, communicationMode, null);
   }
 
   public SendResult createComponent( //
       final int code, //
       final String addr, //
       byte[] componentData, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode, //
       final SendCallback sendCallback //
       ) throws RemotingException, InterruptedException, MyberryServerException {
-    RemotingCommand request = RemotingCommand.createRequestCommand(code, requstHeader);
+    RemotingCommand request = RemotingCommand.createRequestCommand(code, requestHeader);
     request.setBody(componentData);
     return this.sendKernelImpl(code, addr, request, timeoutMillis, communicationMode, sendCallback);
   }
 
-  public SendResult queryAllComponent( //
+  public SendResult queryComponentSize( //
       final int code, //
       final String addr, //
-      byte[] pageData, //
       final CommandCustomHeader requstHeader, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode //
       ) throws RemotingException, InterruptedException, MyberryServerException {
-    return this.queryAllComponent(
-        code, addr, pageData, requstHeader, timeoutMillis, communicationMode, null);
+    return this.queryComponentSize(
+        code, addr, requstHeader, timeoutMillis, communicationMode, null);
   }
 
-  public SendResult queryAllComponent( //
+  public SendResult queryComponentSize( //
       final int code, //
       final String addr, //
-      byte[] pageData, //
       final CommandCustomHeader requstHeader, //
       final long timeoutMillis, //
       final CommunicationMode communicationMode, //
       final SendCallback sendCallback //
       ) throws RemotingException, InterruptedException, MyberryServerException {
     RemotingCommand request = RemotingCommand.createRequestCommand(code, requstHeader);
-    request.setBody(pageData);
+    return this.sendKernelImpl(code, addr, request, timeoutMillis, communicationMode, sendCallback);
+  }
+
+  public SendResult queryComponentByKey( //
+      final int code, //
+      final String addr, //
+      byte[] key, //
+      final CommandCustomHeader requstHeader, //
+      final long timeoutMillis, //
+      final CommunicationMode communicationMode //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryComponentByKey(
+        code, addr, key, requstHeader, timeoutMillis, communicationMode, null);
+  }
+
+  public SendResult queryComponentByKey( //
+      final int code, //
+      final String addr, //
+      byte[] key, //
+      final CommandCustomHeader requstHeader, //
+      final long timeoutMillis, //
+      final CommunicationMode communicationMode, //
+      final SendCallback sendCallback //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    RemotingCommand request = RemotingCommand.createRequestCommand(code, requstHeader);
+    request.setBody(key);
+    return this.sendKernelImpl(code, addr, request, timeoutMillis, communicationMode, sendCallback);
+  }
+
+  public SendResult queryClusterList( //
+      final int code, //
+      final String addr, //
+      final CommandCustomHeader requstHeader, //
+      final long timeoutMillis, //
+      final CommunicationMode communicationMode //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    return this.queryComponentSize(
+        code, addr, requstHeader, timeoutMillis, communicationMode, null);
+  }
+
+  public SendResult queryClusterList( //
+      final int code, //
+      final String addr, //
+      final CommandCustomHeader requstHeader, //
+      final long timeoutMillis, //
+      final CommunicationMode communicationMode, //
+      final SendCallback sendCallback //
+      ) throws RemotingException, InterruptedException, MyberryServerException {
+    RemotingCommand request = RemotingCommand.createRequestCommand(code, requstHeader);
     return this.sendKernelImpl(code, addr, request, timeoutMillis, communicationMode, sendCallback);
   }
 
@@ -310,6 +358,7 @@ public class MyberryClientAPIImpl {
       throws RemotingCommandException, MyberryServerException {
     switch (response.getCode()) {
       case ResponseCode.KEY_EXISTED:
+      case ResponseCode.KEY_NOT_EXISTED:
       case ResponseCode.DISK_FULL:
       case ResponseCode.PASSWORD_ERROR:
       case ResponseCode.DIFF_PRODUCE_MODE:
@@ -321,6 +370,9 @@ public class MyberryClientAPIImpl {
           switch (response.getCode()) {
             case ResponseCode.KEY_EXISTED:
               sendStatus = SendStatus.KEY_EXISTED;
+              break;
+            case ResponseCode.KEY_NOT_EXISTED:
+              sendStatus = SendStatus.KEY_NOT_EXISTED;
               break;
             case ResponseCode.DISK_FULL:
               sendStatus = SendStatus.DISK_FULL;
@@ -343,31 +395,39 @@ public class MyberryClientAPIImpl {
           if (body == null) {
             body = new byte[0];
           }
+
+          SendResult sendResult = new SendResult(sendStatus);
           switch (code) {
             case RequestCode.CREATE_COMPONENT:
               ManageComponentResponseHeader createResponseHeader =
                   (ManageComponentResponseHeader)
                       response.decodeCommandCustomHeader(ManageComponentResponseHeader.class);
               return new SendResult(sendStatus, createResponseHeader.getKey());
-            case RequestCode.QUERY_ALL_COMPONENT:
+            case RequestCode.QUERY_COMPONENT_SIZE:
+              ComponentSizeData componentSizeData = LightCodec.toObj(body, ComponentSizeData.class);
+              sendResult.setSize(componentSizeData.getSize());
+              return sendResult;
+            case RequestCode.QUERY_COMPONENT_BY_KEY:
               ManageComponentResponseHeader queryResponseHeader =
                   (ManageComponentResponseHeader)
                       response.decodeCommandCustomHeader(ManageComponentResponseHeader.class);
-              SendResult sendResult = new SendResult(sendStatus);
+
+              sendResult.setKey(queryResponseHeader.getKey());
               if (ProduceMode.CR.getProduceName().equals(queryResponseHeader.getProduceMode())) {
-                sendResult.setComponentsOfCR(
-                    LightCodec.toObj(body, AllCRComponentData.class).getComponents());
+                sendResult.setComponent(LightCodec.toObj(body, CRComponentData.class));
                 return sendResult;
               } else if (ProduceMode.NS
                   .getProduceName()
                   .equals(queryResponseHeader.getProduceMode())) {
-                sendResult.setComponentsOfNS(
-                    LightCodec.toObj(body, AllNSComponentData.class).getComponents());
+                sendResult.setComponent(LightCodec.toObj(body, NSComponentData.class));
                 return sendResult;
               } else {
                 return new SendResult(sendStatus);
               }
-
+            case RequestCode.QUERY_CLUSTER_LIST:
+              ClusterListData clusterListData = LightCodec.toObj(body, ClusterListData.class);
+              sendResult.setClusterList(clusterListData);
+              return sendResult;
             default:
               assert false;
               break;
@@ -397,7 +457,6 @@ public class MyberryClientAPIImpl {
         {
           HeartbeatData heartbeatData = LightCodec.toObj(response.getBody(), HeartbeatData.class);
           RouterInfo routerInfo = new RouterInfo();
-          routerInfo.setLoadBalanceName(heartbeatData.getLoadBalanceName());
           routerInfo.setMaintainer(heartbeatData.getMaintainer());
           routerInfo.setInvokers(heartbeatData.getInvokers());
 

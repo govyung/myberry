@@ -53,7 +53,7 @@ public abstract class AbstractInvoker {
 
   public abstract PullResult doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
       final long timeoutMillis, //
       final int timesRetry, //
@@ -62,8 +62,29 @@ public abstract class AbstractInvoker {
 
   public abstract void doInvoke(
       final DefaultUserClientImpl defaultUserClientImpl, //
-      final CommandCustomHeader requstHeader, //
+      final CommandCustomHeader requestHeader, //
       final HashMap<String, String> attachments, //
+      final long timeoutMillis, //
+      final int timesRetry, //
+      final CommunicationMode communicationMode,
+      final PullCallback pullCallback //
+      ) throws MyberryClientException;
+
+  public abstract PullResult doInvoke(
+      final DefaultUserClientImpl defaultUserClientImpl, //
+      final CommandCustomHeader requestHeader, //
+      final HashMap<String, String> attachments, //
+      final String sessionKey, //
+      final long timeoutMillis, //
+      final int timesRetry, //
+      final CommunicationMode communicationMode //
+      ) throws RemotingException, InterruptedException, MyberryServerException;
+
+  public abstract void doInvoke(
+      final DefaultUserClientImpl defaultUserClientImpl, //
+      final CommandCustomHeader requestHeader, //
+      final HashMap<String, String> attachments, //
+      final String sessionKey, //
       final long timeoutMillis, //
       final int timesRetry, //
       final CommunicationMode communicationMode,

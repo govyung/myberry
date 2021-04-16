@@ -32,7 +32,7 @@ import org.myberry.common.loadbalance.Invoker;
 
 public class ConsistentHashLoadBalanceTest {
 
-  private static LoadBalance loadBalance;
+  private static ConsistentHashLoadBalance loadBalance;
 
   @BeforeClass
   public static void setup() {

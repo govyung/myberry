@@ -33,9 +33,9 @@ public class PullResult {
 
   private String newId;
 
-  private int start;
-  private int end;
-  private int synergyId;
+  private Integer start;
+  private Integer end;
+  private Integer synergyId;
 
   public PullResult(PullStatus pullStatus, String key) {
     this.pullStatus = pullStatus;
@@ -48,7 +48,8 @@ public class PullResult {
     this.newId = newId;
   }
 
-  public PullResult(PullStatus pullStatus, String key, int start, int end, int synergyId) {
+  public PullResult(
+      PullStatus pullStatus, String key, Integer start, Integer end, Integer synergyId) {
     this.pullStatus = pullStatus;
     this.key = key;
     this.start = start;
@@ -88,27 +89,27 @@ public class PullResult {
     this.newId = newId;
   }
 
-  public int getStart() {
+  public Integer getStart() {
     return start;
   }
 
-  public void setStart(int start) {
+  public void setStart(Integer start) {
     this.start = start;
   }
 
-  public int getEnd() {
+  public Integer getEnd() {
     return end;
   }
 
-  public void setEnd(int end) {
+  public void setEnd(Integer end) {
     this.end = end;
   }
 
-  public int getSynergyId() {
+  public Integer getSynergyId() {
     return synergyId;
   }
 
-  public void setSynergyId(int synergyId) {
+  public void setSynergyId(Integer synergyId) {
     this.synergyId = synergyId;
   }
 

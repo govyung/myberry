@@ -40,7 +40,7 @@ import org.myberry.common.loadbalance.Invoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RoundRobinLoadBalance implements LoadBalance {
+public class RoundRobinLoadBalance {
 
   private static final Logger log = LoggerFactory.getLogger(LoggerName.CLIENT_LOGGER_NAME);
 
@@ -56,6 +56,7 @@ public class RoundRobinLoadBalance implements LoadBalance {
   private final Lock lock = new ReentrantLock();
 
   private static class WeightedRoundRobin {
+
     private int weight;
     private AtomicLong current = new AtomicLong(0);
     private long lastUpdate;
@@ -89,8 +90,7 @@ public class RoundRobinLoadBalance implements LoadBalance {
     }
   }
 
-  @Override
-  public Invoker doSelect(List<Invoker> invokers, String key) {
+  public Invoker doSelect(List<Invoker> invokers) {
     int totalWeight = 0;
     long maxCurrent = Long.MIN_VALUE;
     long now = System.currentTimeMillis();

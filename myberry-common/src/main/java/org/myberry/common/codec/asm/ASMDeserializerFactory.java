@@ -30,7 +30,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.Label;
@@ -47,8 +46,8 @@ public class ASMDeserializerFactory implements Opcodes {
 
   private static final ASMClassLoader amsClassLoader = new ASMClassLoader();
 
-  private static final ConcurrentMap<String /*ClassName*/, MessageLiteDeserializer>
-      messageLiteDeserializerMap = new ConcurrentHashMap<>();
+  private static final Map<String /*ClassName*/, MessageLiteDeserializer>
+      messageLiteDeserializerMap = new HashMap<>();
 
   private static final String ASM_CLASS_DESERIALIZER_PRE = "ASMDeserializer";
   private static final String ASM_DEFAULT_CONSTRUCTOR_NAME = "<init>";
@@ -84,8 +83,15 @@ public class ASMDeserializerFactory implements Opcodes {
     if (!isMessageLite(clazz)) {
       throw new RuntimeException(clazz.getName() + " did not directly implement MessageLite");
     }
-    messageLiteDeserializer = factoryASMDeserializer(clazz);
-    messageLiteDeserializerMap.putIfAbsent(clazz.getName(), messageLiteDeserializer);
+    synchronized (messageLiteDeserializerMap) {
+      messageLiteDeserializer = messageLiteDeserializerMap.get(clazz.getName());
+      if (null != messageLiteDeserializer) {
+        return messageLiteDeserializer;
+      }
+
+      messageLiteDeserializer = factoryASMDeserializer(clazz);
+      messageLiteDeserializerMap.put(clazz.getName(), messageLiteDeserializer);
+    }
     return messageLiteDeserializer;
   }
 

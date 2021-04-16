@@ -24,17 +24,22 @@
 package org.myberry.server.processor;
 
 import io.netty.channel.ChannelHandlerContext;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.myberry.common.ProduceMode;
 import org.myberry.common.codec.LightCodec;
 import org.myberry.common.constant.LoggerName;
+import org.myberry.common.loadbalance.Invoker;
 import org.myberry.common.protocol.RequestCode;
 import org.myberry.common.protocol.ResponseCode;
-import org.myberry.common.protocol.body.admin.AllCRComponentData;
-import org.myberry.common.protocol.body.admin.AllNSComponentData;
 import org.myberry.common.protocol.body.admin.CRComponentData;
+import org.myberry.common.protocol.body.admin.ClusterListData;
+import org.myberry.common.protocol.body.admin.ClusterListData.ClusterNode;
+import org.myberry.common.protocol.body.admin.ComponentKeyData;
+import org.myberry.common.protocol.body.admin.ComponentSizeData;
 import org.myberry.common.protocol.body.admin.NSComponentData;
-import org.myberry.common.protocol.body.admin.PageData;
 import org.myberry.common.protocol.header.admin.ManageComponentRequestHeader;
 import org.myberry.common.protocol.header.admin.ManageComponentResponseHeader;
 import org.myberry.remoting.netty.NettyRequestProcessor;
@@ -89,9 +94,16 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
           response.setRemark("Client mode and server mode are different.");
         }
         break;
-      case RequestCode.QUERY_ALL_COMPONENT:
-        PageData pageData = LightCodec.toObj(request.getBody(), PageData.class);
-        response = queryAllComponent(pageData);
+      case RequestCode.QUERY_COMPONENT_SIZE:
+        response = queryComponentSize();
+        break;
+      case RequestCode.QUERY_COMPONENT_BY_KEY:
+        ComponentKeyData componentKeyData =
+            LightCodec.toObj(request.getBody(), ComponentKeyData.class);
+        response = queryComponentByKey(componentKeyData.getKey());
+        break;
+      case RequestCode.QUERY_CLUSTER_LIST:
+        response = queryClusterList();
         break;
       default:
         break;
@@ -106,23 +118,14 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
   }
 
   private RemotingCommand createCRComponent(CRComponentData crComponentData) {
-
     AdminManageResult result =
         serverController
             .getMyberryService()
             .addComponent(crComponentData.getKey(), crComponentData.getExpression());
-
-    log.info(
-        "[{}] [{} : {}] process success.",
-        getProcessorName(),
-        crComponentData.getKey(),
-        crComponentData.getExpression());
-
     return createResponseCommand(result.getRespCode(), crComponentData.getKey());
   }
 
   private RemotingCommand createNSComponent(NSComponentData nsComponentData) {
-
     AdminManageResult result =
         serverController
             .getMyberryService()
@@ -131,15 +134,6 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
                 nsComponentData.getValue(),
                 nsComponentData.getStepSize(),
                 nsComponentData.getResetType());
-
-    log.info(
-        "[{}] [{} : {} : {} : {}] process success.",
-        getProcessorName(),
-        nsComponentData.getKey(),
-        nsComponentData.getValue(),
-        nsComponentData.getStepSize(),
-        nsComponentData.getResetType());
-
     return createResponseCommand(result.getRespCode(), nsComponentData.getKey());
   }
 
@@ -152,36 +146,78 @@ public class AdminRequestProcessor implements NettyRequestProcessor {
     return response;
   }
 
-  private RemotingCommand queryAllComponent(PageData pageData) {
-
-    ManageComponentResponseHeader responseHeader = new ManageComponentResponseHeader();
-    responseHeader.setKey("");
-    responseHeader.setProduceMode(serverController.getStoreConfig().getProduceMode());
+  private RemotingCommand queryComponentSize() {
+    int size = serverController.getMyberryService().queryComponentSize();
+    ComponentSizeData componentSizeData = new ComponentSizeData();
+    componentSizeData.setSize(size);
 
     RemotingCommand response = RemotingCommand.createResponseCommand(null);
+    response.setBody(LightCodec.toBytes(componentSizeData));
+    response.setCode(ResponseCode.SUCCESS);
+    response.setRemark(null);
+    return response;
+  }
 
-    Object queryAllComponent =
-        serverController
-            .getMyberryService()
-            .queryComponentList(pageData.getPageNo(), pageData.getPageSize());
-    if (ProduceMode.CR
-        .getProduceName()
-        .equals(serverController.getStoreConfig().getProduceMode())) {
-      AllCRComponentData allCRComponentData = new AllCRComponentData();
-      allCRComponentData.setComponents((List<CRComponentData>) queryAllComponent);
-      response.setBody(LightCodec.toBytes(allCRComponentData));
-    } else if (ProduceMode.NS
-        .getProduceName()
-        .equals(serverController.getStoreConfig().getProduceMode())) {
-      AllNSComponentData allNSComponentData = new AllNSComponentData();
-      allNSComponentData.setComponents((List<NSComponentData>) queryAllComponent);
-      response.setBody(LightCodec.toBytes(allNSComponentData));
+  private RemotingCommand queryComponentByKey(String key) {
+    ManageComponentResponseHeader responseHeader = new ManageComponentResponseHeader();
+    responseHeader.setKey(key);
+    responseHeader.setProduceMode(serverController.getStoreConfig().getProduceMode());
+
+    AdminManageResult adminManageResult =
+        serverController.getMyberryService().queryComponentByKey(key);
+
+    RemotingCommand response = RemotingCommand.createResponseCommand(null);
+    if (adminManageResult.getComponent() instanceof CRComponentData) {
+      CRComponentData crcd = (CRComponentData) adminManageResult.getComponent();
+      response.setBody(LightCodec.toBytes(crcd));
+    } else if (adminManageResult.getComponent() instanceof NSComponentData) {
+      NSComponentData nscd = (NSComponentData) adminManageResult.getComponent();
+      response.setBody(LightCodec.toBytes(nscd));
     }
 
     response.writeCustomHeader(responseHeader);
-    response.setCode(ResponseCode.SUCCESS);
+    response.setCode(adminManageResult.getRespCode());
     response.setRemark(null);
 
+    return response;
+  }
+
+  private RemotingCommand queryClusterList() {
+    ClusterListData clusterListData = new ClusterListData();
+
+    ArrayList<ClusterNode> clusters = new ArrayList<>();
+
+    if (serverController.getServerConfig().getClusterName() != null) {
+      String leaderInfo = serverController.getRouteInfoManager().getLeaderInfo();
+      String[] leader = leaderInfo.split(":");
+      ClusterNode clusterNode = new ClusterNode();
+      clusterNode.setSid(serverController.getMyberryStore().getMySidFromDisk());
+      clusterNode.setType("Leader");
+      clusterNode.setIp(leader[0]);
+      clusterNode.setServicePort(Integer.parseInt(leader[1]));
+      clusters.add(clusterNode);
+
+      Map<Integer, Invoker> learnerTable = serverController.getRouteInfoManager().getLearnerTable();
+      Iterator<Entry<Integer, Invoker>> it = learnerTable.entrySet().iterator();
+
+      while (it.hasNext()) {
+        Entry<Integer, Invoker> entry = it.next();
+        String[] learner = entry.getValue().getAddr().split(":");
+        clusterNode = new ClusterNode();
+        clusterNode.setSid(entry.getKey());
+        clusterNode.setType("Learner");
+        clusterNode.setIp(learner[0]);
+        clusterNode.setServicePort(Integer.parseInt(learner[1]));
+        clusters.add(clusterNode);
+      }
+    }
+
+    clusterListData.setClusters(clusters);
+
+    RemotingCommand response = RemotingCommand.createResponseCommand(null);
+    response.setBody(LightCodec.toBytes(clusterListData));
+    response.setCode(ResponseCode.SUCCESS);
+    response.setRemark(null);
     return response;
   }
 
