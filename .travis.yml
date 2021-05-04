@@ -6,14 +6,6 @@ jdk: openjdk8
 
 install: true
 
-coverage:
-  status:
-    project:
-      default:
-        # basic
-        target: auto
-        threshold: 25%
-
 script:
   - mvn jacoco:prepare-agent -Prelease-all clean install -U
   - mvn jacoco:report
