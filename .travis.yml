@@ -16,7 +16,7 @@ script:
   - mvn jacoco:report
 
 after_success:
-  - bash <(curl -sm 0.5 -d “$(git remote -v))
+  - bash <(curl -s https://codecov.io/bash)
 
 after_failure:
   - echo "build failed!"
