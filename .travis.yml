@@ -1,15 +1,18 @@
 dist: xenial
+os: linux
 
 language: java
-
-jdk:
-  - openjdk8
-
-matrix:
-  include:
-    - os: linux
+jdk: openjdk8
 
 install: true
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 25%
 
 script:
   - mvn jacoco:prepare-agent -Prelease-all clean install -U
