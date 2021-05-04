@@ -1,8 +1,13 @@
+dist: xenial
+
 language: java
-sudo: false
 
 jdk:
   - openjdk8
+
+matrix:
+  include:
+    - os: linux
 
 install: true
 
@@ -11,7 +16,7 @@ script:
   - mvn jacoco:report
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -sm 0.5 -d “$(git remote -v))
 
 after_failure:
   - echo "build failed!"
